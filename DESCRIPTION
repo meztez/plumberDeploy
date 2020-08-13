@@ -13,5 +13,3 @@ RoxygenNote: 7.1.1
 Imports: 
     analogsea,
     jsonlite
-Suggests: 
-    plumber
