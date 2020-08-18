@@ -16,29 +16,29 @@ do_deploy_api(
 }
 \arguments{
 \item{droplet}{The droplet on which to act. It's expected that this droplet
-was provisioned using [do_provision()].  See [analogsea::droplet()] to
+was provisioned using \code{\link[=do_provision]{do_provision()}}.  See \code{\link[analogsea:droplet]{analogsea::droplet()}} to
 obtain a reference to a running droplet.}
 
 \item{path}{The remote path/name of the application}
 
 \item{localPath}{The local path to the API that you want to deploy. The
-entire directory referenced will be deployed, and the `plumber.R` file
+entire directory referenced will be deployed, and the \code{plumber.R} file
 inside of that directory will be used as the root plumber file. The
-directory MUST contain a `plumber.R` file.}
+directory MUST contain a \code{plumber.R} file.}
 
 \item{port}{The internal port on which this service should run. This will not
 be user visible, but must be unique and point to a port that is available
-on your server. If unsure, try a number around `8000`.}
+on your server. If unsure, try a number around \code{8000}.}
 
-\item{forward}{If `TRUE`, will setup requests targeting the root URL on the
-server to point to this application. See the [do_forward()] function for
+\item{forward}{If \code{TRUE}, will setup requests targeting the root URL on the
+server to point to this application. See the \code{\link[=do_forward]{do_forward()}} function for
 more details.}
 
-\item{swagger}{If `TRUE`, will enable the Swagger interface for the remotely
+\item{swagger}{If \code{TRUE}, will enable the Swagger interface for the remotely
 deployed API. By default, the interface is disabled.}
 
-\item{preflight}{R commands to run after [plumb()]ing the `plumber.R` file,
-but before `run()`ing the plumber service. This is an opportunity to e.g.
+\item{preflight}{R commands to run after \code{plumb()}ing the \code{plumber.R} file,
+but before \code{run()}ing the plumber service. This is an opportunity to e.g.
 add new filters. If you need to specify multiple commands, they should be
 semi-colon-delimited.}
 }

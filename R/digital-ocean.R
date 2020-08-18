@@ -4,8 +4,11 @@
 
 checkAnalogSea <- function() {
   if (!requireNamespace("analogsea", quietly = TRUE)) {
-    stop("The analogsea package is not available but is required in order to use the provisioning functions. Please install analogsea.",
-         call. = FALSE)
+    stop(paste0(
+      "The analogsea package is not available but ",
+      "is required in order to use the provisioning functions. ",
+      "Please install analogsea."),
+      call. = FALSE)
   }
 
 
@@ -25,9 +28,12 @@ checkAnalogSea <- function() {
 #' deploy a sample plumber application on a DigitalOcean virtual machine.
 #' You may sign up for a Digital Ocean account [here](https://m.do.co/c/add0b50f54c4).
 #' This command is idempotent, so feel free to run it on a single server multiple times.
-#' @param droplet The DigitalOcean droplet that you want to provision (see [analogsea::droplet()]). If empty, a new DigitalOcean server will be created.
-#' @param unstable If `FALSE`, will install plumber from CRAN. If `TRUE`, will install the unstable version of plumber from GitHub.
-#' @param example If `TRUE`, will deploy an example API named `hello` to the server on port 8000.
+#' @param droplet The DigitalOcean droplet that you want to provision
+#' (see [analogsea::droplet()]). If empty, a new DigitalOcean server will be created.
+#' @param unstable If `FALSE`, will install plumber from CRAN. If `TRUE`, will
+#' install the unstable version of plumber from GitHub.
+#' @param example If `TRUE`, will deploy an example API named `hello`
+#' to the server on port 8000.
 #' @param ... Arguments passed into the [analogsea::droplet_create()] function.
 #' @details Provisions a Ubuntu 20.04-x64 droplet with the following customizations:
 #'  - A recent version of R installed
@@ -105,19 +111,19 @@ install_plumber <- function(droplet, unstable){
 #' Captures the output from running some command via SSH
 #' @noRd
 droplet_capture <- function(droplet, command){
-    tf <- tempdir()
-    randName <- paste(sample(c(letters, LETTERS), size=10, replace=TRUE), collapse="")
-    tff <- file.path(tf, randName)
-    on.exit({
-      if (file.exists(tff)) {
-        file.remove(tff)
-      }
-    })
-    analogsea::droplet_ssh(droplet, paste0(command, " > /tmp/", randName))
-    analogsea::droplet_download(droplet, paste0("/tmp/", randName), tf)
-    analogsea::droplet_ssh(droplet, paste0("rm /tmp/", randName))
-    lin <- readLines(tff)
-    lin
+  tf <- tempdir()
+  randName <- paste(sample(c(letters, LETTERS), size=10, replace=TRUE), collapse="")
+  tff <- file.path(tf, randName)
+  on.exit({
+    if (file.exists(tff)) {
+      file.remove(tff)
+    }
+  })
+  analogsea::droplet_ssh(droplet, paste0(command, " > /tmp/", randName))
+  analogsea::droplet_download(droplet, paste0("/tmp/", randName), tf)
+  analogsea::droplet_ssh(droplet, paste0("rm /tmp/", randName))
+  lin <- readLines(tff)
+  lin
 }
 
 install_api <- function(droplet){
@@ -145,18 +151,27 @@ install_nginx <- function(droplet){
   analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot")
   analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/")
   analogsea::droplet_upload(droplet, local=system.file("server", "nginx.conf", package="plumber"),
-                 remote="/etc/nginx/sites-available/plumber")
+                            remote="/etc/nginx/sites-available/plumber")
   analogsea::droplet_ssh(droplet, "ln -sf /etc/nginx/sites-available/plumber /etc/nginx/sites-enabled/")
   analogsea::droplet_ssh(droplet, "systemctl reload nginx")
 }
 
 install_new_r <- function(droplet){
   analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9")
-  analogsea::droplet_ssh(droplet, "echo 'deb https://cran.rstudio.com/bin/linux/ubuntu focal-cran40/' >> /etc/apt/sources.list.d/cran.list")
+  analogsea::droplet_ssh(droplet, paste0(
+    "echo 'deb https://cran.rstudio.com/bin/linux/ubuntu ",
+    "focal-cran40/' >> /etc/apt/sources.list.d/cran.list")
+  )
   # TODO: use the analogsea version once https://github.com/sckott/analogsea/issues/139 is resolved
   #analogsea::debian_apt_get_update(droplet)
   analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
-  analogsea::droplet_ssh(droplet, 'sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade')
+  analogsea::droplet_ssh(
+    droplet,
+    paste0('sudo DEBIAN_FRONTEND=noninteractive ',
+           'apt-get -y -o Dpkg::Options::="',
+           '--force-confdef" -o Dpkg::Options::="',
+           '--force-confold" upgrade')
+  )
 
   analogsea::debian_install_r(droplet)
 }
@@ -188,7 +203,8 @@ install_new_r <- function(droplet){
 #'   certificate to enable them to contact you about issues with renewal or
 #'   security.
 #' @param termsOfService Set to `TRUE` to agree to the letsencrypt subscriber
-#'   agreement. At the time of writing, the current version is available [here](https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf).
+#'   agreement. At the time of writing, the current version is available
+#'   [here](https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf).
 #'   Must be set to true to obtain a certificate through letsencrypt.
 #' @param force If `FALSE`, will abort if it believes that the given domain name
 #'   is not yet pointing at the appropriate IP address for this droplet. If
@@ -227,9 +243,10 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
               "create a new droplet and reassign the floating IP used with DNS later.")
     } else if (! ip %in% floating) {
       print(list(ip=ip, floatingIPs = unname(floating), ephemeralIPs = unname(ephemeral)))
-      stop("It doesn't appear that the domain name '", domain, "' is pointed to an IP address associated with this droplet. ",
-           "This could be due to a DNS misconfiguration or because the changes just haven't propagated through the Internet yet. ",
-           "If you believe this is an error, you can override this check by setting force=TRUE.")
+      stop(
+        "It doesn't appear that the domain name '", domain, "' is pointed to an IP address associated with this droplet. ",
+        "This could be due to a DNS misconfiguration or because the changes just haven't propagated through the Internet yet. ",
+        "If you believe this is an error, you can override this check by setting force=TRUE.")
     }
     message("Confirmed that '", domain, "' references one of the available IP addresses.")
   }
@@ -238,7 +255,8 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
     stop("You must provide a valid domain name which points to this server in order to get an SSL certificate.")
   }
   if (missing(email)){
-    stop("You must provide an email to letsencrypt -- the provider of your SSL certificate -- for 'urgent renewal and security notices'.")
+    stop(
+      "You must provide an email to letsencrypt -- the provider of your SSL certificate -- for 'urgent renewal and security notices'.")
   }
   if (!termsOfService){
     stop("You must agree to the letsencrypt terms of service before running this function")
@@ -260,7 +278,15 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
   analogsea::debian_apt_get_update(droplet)
   analogsea::debian_apt_get_install(droplet, "certbot")
   analogsea::droplet_ssh(droplet, "ufw allow https")
-  analogsea::droplet_ssh(droplet, sprintf("certbot certonly --webroot -w /var/certbot/ -n -d %s --email %s --agree-tos --renew-hook '/bin/systemctl reload nginx'", domain, email))
+  analogsea::droplet_ssh(
+    droplet,
+    sprintf(
+      paste0("certbot certonly --webroot -w ",
+             "/var/certbot/ -n -d %s --email %s ",
+             "--agree-tos --renew-hook ",
+             "'/bin/systemctl reload nginx'"),
+      domain, email)
+  )
   analogsea::droplet_upload(droplet, conffile, "/etc/nginx/sites-available/plumber")
   analogsea::droplet_ssh(droplet, "systemctl reload nginx")
 
@@ -290,7 +316,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #'   more details.
 #' @param swagger If `TRUE`, will enable the Swagger interface for the remotely
 #'   deployed API. By default, the interface is disabled.
-#' @param preflight R commands to run after [plumb()]ing the `plumber.R` file,
+#' @param preflight R commands to run after \code{plumb()}ing the `plumber.R` file,
 #'   but before `run()`ing the plumber service. This is an opportunity to e.g.
 #'   add new filters. If you need to specify multiple commands, they should be
 #'   semi-colon-delimited.
@@ -313,11 +339,14 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
 
   ### UPLOAD the API ###
-  remoteTmp <- paste0("/tmp/", paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
+  remoteTmp <- paste0("/tmp/",
+                      paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
   dirName <- basename(localPath)
   analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp))
   analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp)
-  analogsea::droplet_ssh(droplet, paste("mv", paste0(remoteTmp, "/", dirName, "/"), paste0("/var/plumber/", path)))
+  analogsea::droplet_ssh(droplet,
+                         paste("mv", paste0(remoteTmp, "/", dirName, "/"),
+                               paste0("/var/plumber/", path)))
 
   ### SYSTEMD ###
   serviceName <- paste0("plumber-", path)
@@ -355,7 +384,8 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   file.remove(servicefile)
 
   # TODO: differentiate between new service (start) and existing service (restart)
-  analogsea::droplet_ssh(droplet, paste0("systemctl start ", serviceName, " && sleep 1")) #TODO: can systemctl listen for the port to come online so we don't have to guess at a sleep value?
+  analogsea::droplet_ssh(droplet, paste0("systemctl start ", serviceName, " && sleep 1"))
+  #TODO: can systemctl listen for the port to come online so we don't have to guess at a sleep value?
   analogsea::droplet_ssh(droplet, paste0("systemctl restart ", serviceName, " && sleep 1"))
   analogsea::droplet_ssh(droplet, paste0("systemctl enable ", serviceName))
   analogsea::droplet_ssh(droplet, paste0("systemctl status ", serviceName))
