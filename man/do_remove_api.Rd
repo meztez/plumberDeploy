@@ -8,13 +8,13 @@ do_remove_api(droplet, path, delete = FALSE)
 }
 \arguments{
 \item{droplet}{The droplet on which to act. It's expected that this droplet
-was provisioned using [do_provision()]. See [analogsea::droplet()] to
+was provisioned using \code{\link[=do_provision]{do_provision()}}. See \code{\link[analogsea:droplet]{analogsea::droplet()}} to
 obtain a reference to a running droplet.}
 
 \item{path}{The path/name of the plumber service}
 
-\item{delete}{If `TRUE`, will also delete the associated directory
-(`/var/plumber/whatever`) from the server.}
+\item{delete}{If \code{TRUE}, will also delete the associated directory
+(\verb{/var/plumber/whatever}) from the server.}
 }
 \description{
 Removes all services and routing rules associated with a particular service.

@@ -13,7 +13,7 @@ do_configure_https(
 )
 }
 \arguments{
-\item{droplet}{The droplet on which to act. See [analogsea::droplet()].}
+\item{droplet}{The droplet on which to act. See \code{\link[analogsea:droplet]{analogsea::droplet()}}.}
 
 \item{domain}{The domain name associated with this instance. Used to obtain a
 TLS/SSL certificate.}
@@ -22,33 +22,33 @@ TLS/SSL certificate.}
 certificate to enable them to contact you about issues with renewal or
 security.}
 
-\item{termsOfService}{Set to `TRUE` to agree to the letsencrypt subscriber
-agreement. At the time of writing, the current version is available [here](https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf).
+\item{termsOfService}{Set to \code{TRUE} to agree to the letsencrypt subscriber
+agreement. At the time of writing, the current version is available
+\href{https://letsencrypt.org/documents/LE-SA-v1.1.1-August-1-2016.pdf}{here}.
 Must be set to true to obtain a certificate through letsencrypt.}
 
-\item{force}{If `FALSE`, will abort if it believes that the given domain name
+\item{force}{If \code{FALSE}, will abort if it believes that the given domain name
 is not yet pointing at the appropriate IP address for this droplet. If
-`TRUE`, will ignore this check and attempt to proceed regardless.}
+\code{TRUE}, will ignore this check and attempt to proceed regardless.}
 }
 \description{
-Adds TLS/SSL (HTTPS) to a droplet created using [do_provision()].
+Adds TLS/SSL (HTTPS) to a droplet created using \code{\link[=do_provision]{do_provision()}}.
 }
 \details{
 In order to get a TLS/SSL certificate, you need to point a domain name to the
 IP address associated with your droplet. If you don't already have a domain
-name, you can register one [here](http://tres.tl/domain). Point a (sub)domain
+name, you can register one \href{http://tres.tl/domain}{here}. Point a (sub)domain
 to the IP address associated with your plumber droplet before calling this
 function. These changes may take a few minutes or hours to propagate around
 the Internet, but once complete you can then execute this function with the
 given domain to be granted a TLS/SSL certificate for that domain.
 
 Obtains a free TLS/SSL certificate from
-  [letsencrypt](https://letsencrypt.org/) and installs it in nginx. It also
-  configures nginx to route all unencrypted HTTP traffic (port 80) to HTTPS.
-  Your TLS certificate will be automatically renewed and deployed. It also
-  opens port 443 in the firewall to allow incoming HTTPS traffic.
+\href{https://letsencrypt.org/}{letsencrypt} and installs it in nginx. It also
+configures nginx to route all unencrypted HTTP traffic (port 80) to HTTPS.
+Your TLS certificate will be automatically renewed and deployed. It also
+opens port 443 in the firewall to allow incoming HTTPS traffic.
 
-  Historically, HTTPS certificates required payment in advance. If you
-  appreciate this service, consider [donating to the letsencrypt
-  project](https://letsencrypt.org/donate/).
+Historically, HTTPS certificates required payment in advance. If you
+appreciate this service, consider \href{https://letsencrypt.org/donate/}{donating to the letsencrypt project}.
 }
