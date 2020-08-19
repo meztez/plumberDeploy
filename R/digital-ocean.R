@@ -2,26 +2,6 @@
 # can't really test these.
 # nocov start
 
-checkAnalogSea <- function() {
-  if (!requireNamespace("analogsea", quietly = TRUE)) {
-    stop(paste0(
-      "The analogsea package is not available but ",
-      "is required in order to use the provisioning functions. ",
-      "Please install analogsea."),
-      call. = FALSE)
-  }
-
-
-  suggests <- read.dcf(system.file("DESCRIPTION", package = "plumber"))[1, "Suggests"]
-  pkgs <- strsplit(suggests, ",")[[1]]
-  pkgs <- trimws(pkgs)
-  analogsea_version <- gsub("[^.0-9]", "", pkgs[grepl("^analogsea ", pkgs)])
-  if (utils::packageVersion("analogsea") < package_version(analogsea_version)) {
-    stop("The analogsea package is not high enough. Please update `analogsea`.",
-         call. = FALSE)
-  }
-}
-
 #' Provision a DigitalOcean plumber server
 #'
 #' Create (if required), install the necessary prerequisites, and
@@ -51,7 +31,6 @@ checkAnalogSea <- function() {
 #'    able to get through the necessary R package compilations.
 #' @export
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
-  checkAnalogSea()
 
   if (missing(droplet)){
     # No droplet provided; create a new server
@@ -150,7 +129,7 @@ install_nginx <- function(droplet){
   analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default") # Disable the default site
   analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot")
   analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/")
-  analogsea::droplet_upload(droplet, local=system.file("server", "nginx.conf", package="plumber"),
+  analogsea::droplet_upload(droplet, local=system.file("server", "nginx.conf", package="plumberDeploy"),
                             remote="/etc/nginx/sites-available/plumber")
   analogsea::droplet_ssh(droplet, "ln -sf /etc/nginx/sites-available/plumber /etc/nginx/sites-enabled/")
   analogsea::droplet_ssh(droplet, "systemctl reload nginx")
@@ -211,7 +190,6 @@ install_new_r <- function(droplet){
 #'   `TRUE`, will ignore this check and attempt to proceed regardless.
 #' @export
 do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, force=FALSE){
-  checkAnalogSea()
 
   # This could be done locally, but I don't have a good way of testing cross-platform currently.
   # I can't figure out how to capture the output of the system() call inside
@@ -268,7 +246,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
   domain <- sub("/$", "", domain)
 
   # Prepare the nginx conf file.
-  conf <- readLines(system.file("server", "nginx-ssl.conf", package="plumber"))
+  conf <- readLines(system.file("server", "nginx-ssl.conf", package="plumberDeploy"))
   conf <- gsub("\\$DOMAIN\\$", domain, conf)
 
   conffile <- tempfile()
@@ -351,7 +329,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   ### SYSTEMD ###
   serviceName <- paste0("plumber-", path)
 
-  service <- readLines(system.file("server", "plumber.service", package="plumber"))
+  service <- readLines(system.file("server", "plumber.service", package="plumberDeploy"))
   service <- gsub("\\$PORT\\$", port, service)
   service <- gsub("\\$PATH\\$", paste0("/", path), service)
 
@@ -392,7 +370,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 
   ### NGINX ###
   # Prepare the nginx conf file
-  conf <- readLines(system.file("server", "plumber-api.conf", package="plumber"))
+  conf <- readLines(system.file("server", "plumber-api.conf", package="plumberDeploy"))
   conf <- gsub("\\$PORT\\$", port, conf)
   conf <- gsub("\\$PATH\\$", path, conf)
 
@@ -429,7 +407,7 @@ do_forward <- function(droplet, path){
     stop("Can't deploy to nested paths. '", path, "' should not have a / in it.")
   }
 
-  forward <- readLines(system.file("server", "forward.conf", package="plumber"))
+  forward <- readLines(system.file("server", "forward.conf", package="plumberDeploy"))
   forward <- gsub("\\$PATH\\$", paste0(path), forward)
 
   forwardfile <- tempfile()
