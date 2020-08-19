@@ -2,26 +2,6 @@
 # can't really test these.
 # nocov start
 
-checkAnalogSea <- function() {
-  if (!requireNamespace("analogsea", quietly = TRUE)) {
-    stop(paste0(
-      "The analogsea package is not available but ",
-      "is required in order to use the provisioning functions. ",
-      "Please install analogsea."),
-      call. = FALSE)
-  }
-
-
-  suggests <- read.dcf(system.file("DESCRIPTION", package = "plumber"))[1, "Suggests"]
-  pkgs <- strsplit(suggests, ",")[[1]]
-  pkgs <- trimws(pkgs)
-  analogsea_version <- gsub("[^.0-9]", "", pkgs[grepl("^analogsea ", pkgs)])
-  if (utils::packageVersion("analogsea") < package_version(analogsea_version)) {
-    stop("The analogsea package is not high enough. Please update `analogsea`.",
-         call. = FALSE)
-  }
-}
-
 #' Provision a DigitalOcean plumber server
 #'
 #' Create (if required), install the necessary prerequisites, and
@@ -51,7 +31,6 @@ checkAnalogSea <- function() {
 #'    able to get through the necessary R package compilations.
 #' @export
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
-  checkAnalogSea()
 
   if (missing(droplet)){
     # No droplet provided; create a new server
@@ -211,7 +190,6 @@ install_new_r <- function(droplet){
 #'   `TRUE`, will ignore this check and attempt to proceed regardless.
 #' @export
 do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, force=FALSE){
-  checkAnalogSea()
 
   # This could be done locally, but I don't have a good way of testing cross-platform currently.
   # I can't figure out how to capture the output of the system() call inside
