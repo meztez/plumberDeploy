@@ -5,7 +5,7 @@ Version: 0.1.0
 Roxygen: list(markdown = TRUE)
 Authors@R: c(
   person("Bruno", "Tremblay", role = c("aut", "cre"), email = "cran@neoxone.com"),
-  person("Jeff", "Allen", role = c("aut", "ccp"), email = "cran@trestletech.com"),  
+  person("Jeff", "Allen", role = c("aut", "ccp"), email = "cran@trestletech.com"),
   person("John", "Muschelli", email = "muschellij2@gmail.com",
            role = c("aut"), comment = c(ORCID = "0000-0001-6469-1750")))
 Depends:
