@@ -209,7 +209,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
     # from the droplet to get a real-time response.
     metadata <- droplet_capture(droplet, "curl http://169.254.169.254/metadata/v1.json")
 
-    parsed <- safeFromJSON(metadata)
+    parsed <- parse_json(metadata, simplifyVector = TRUE)
     floating <- unlist(lapply(parsed$floating_ip, function(ipv){ ipv$ip_address }))
     ephemeral <- unlist(parsed$interfaces$public)["ipv4.ip_address"]
 
@@ -292,7 +292,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #' @param forward If `TRUE`, will setup requests targeting the root URL on the
 #'   server to point to this application. See the [do_forward()] function for
 #'   more details.
-#' @param swagger If `TRUE`, will enable the Swagger interface for the remotely
+#' @param docs If `TRUE`, will enable the documentation interface for the remotely
 #'   deployed API. By default, the interface is disabled.
 #' @param preflight R commands to run after \code{plumb()}ing the `plumber.R` file,
 #'   but before `run()`ing the plumber service. This is an opportunity to e.g.
@@ -300,7 +300,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #'   semi-colon-delimited.
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
-                          swagger=FALSE, preflight){
+                          docs=FALSE, preflight){
   # Trim off any leading slashes
   path <- sub("^/+", "", path)
   # Trim off any trailing slashes if any exist.
@@ -343,12 +343,12 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
   service <- gsub("\\$PREFLIGHT\\$", preflight, service)
 
-  if (missing(swagger)){
-    swagger <- "FALSE"
+  if (missing(docs)){
+    docs <- "FALSE"
   } else {
-    swagger <- "TRUE"
+    docs <- "TRUE"
   }
-  service <- gsub("\\$SWAGGER\\$", swagger, service)
+  service <- gsub("\\$DOCS\\$", docs, service)
 
   servicefile <- tempfile()
   writeLines(service, servicefile)
