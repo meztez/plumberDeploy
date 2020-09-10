@@ -10,7 +10,7 @@ do_deploy_api(
   localPath,
   port,
   forward = FALSE,
-  swagger = FALSE,
+  docs = FALSE,
   preflight
 )
 }
@@ -34,7 +34,7 @@ on your server. If unsure, try a number around \code{8000}.}
 server to point to this application. See the \code{\link[=do_forward]{do_forward()}} function for
 more details.}
 
-\item{swagger}{If \code{TRUE}, will enable the Swagger interface for the remotely
+\item{docs}{If \code{TRUE}, will enable the documentation interface for the remotely
 deployed API. By default, the interface is disabled.}
 
 \item{preflight}{R commands to run after \code{plumb()}ing the \code{plumber.R} file,
