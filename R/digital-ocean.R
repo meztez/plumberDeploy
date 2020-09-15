@@ -136,22 +136,10 @@ install_nginx <- function(droplet){
 }
 
 install_new_r <- function(droplet){
-  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9")
-  analogsea::droplet_ssh(droplet, paste0(
-    "echo 'deb https://cran.rstudio.com/bin/linux/ubuntu ",
-    "focal-cran40/' >> /etc/apt/sources.list.d/cran.list")
-  )
-  # TODO: use the analogsea version once https://github.com/sckott/analogsea/issues/139 is resolved
-  #analogsea::debian_apt_get_update(droplet)
-  analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
-  analogsea::droplet_ssh(
-    droplet,
-    paste0('sudo DEBIAN_FRONTEND=noninteractive ',
-           'apt-get -y -o Dpkg::Options::="',
-           '--force-confdef" -o Dpkg::Options::="',
-           '--force-confold" upgrade')
-  )
-
+  analogsea::droplet_ssh(droplet, "apt install dirmngr gnupg apt-transport-https ca-certificates software-properties-common")
+  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9")
+  analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'")
+  analogsea::debian_apt_get_update(droplet)
   analogsea::debian_install_r(droplet)
 }
 
