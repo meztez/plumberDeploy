@@ -65,26 +65,23 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   install_firewall(droplet)
 
   if (example){
-    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package="plumber"), port=8000, forward=TRUE)
+    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package = "plumber"), port=8000, forward=TRUE)
   }
 
   invisible(droplet)
 }
 
 install_plumber <- function(droplet, unstable){
-  # Satisfy sodium's requirements
-  analogsea::debian_apt_get_install(droplet, "libsodium-dev")
+
+  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev")
 
   if (unstable){
-    analogsea::debian_apt_get_install(droplet, "libcurl4-openssl-dev")
-    analogsea::debian_apt_get_install(droplet, "libgit2-dev")
-    analogsea::debian_apt_get_install(droplet, "libssl-dev")
-    analogsea::debian_apt_get_install(droplet, "libsodium-dev")
-    analogsea::install_r_package(droplet, "remotes", repo="https://cran.rstudio.com")
+    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
     analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"")
   } else {
-    analogsea::install_r_package(droplet, "plumber")
+    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
   }
+
 }
 
 #' Captures the output from running some command via SSH
