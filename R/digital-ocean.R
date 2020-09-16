@@ -7,6 +7,7 @@
 #' Create (if required), install the necessary prerequisites, and
 #' deploy a sample plumber application on a DigitalOcean virtual machine.
 #' You may sign up for a Digital Ocean account [here](https://m.do.co/c/add0b50f54c4).
+#' You should configure an account ssh key with [analogsea::key_create()] prior to using this method.
 #' This command is idempotent, so feel free to run it on a single server multiple times.
 #' @param droplet The DigitalOcean droplet that you want to provision
 #' (see [analogsea::droplet()]). If empty, a new DigitalOcean server will be created.
@@ -33,9 +34,15 @@
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 
   if (missing(droplet)){
+
     # No droplet provided; create a new server
     message("THIS ACTION COSTS YOU MONEY!")
     message("Provisioning a new server for which you will get a bill from DigitalOcean.")
+
+    # Check if DO has ssh keys configured
+    if (!length(analogsea::keys())) {
+      stop("Please add an ssh key to your Digital Ocean account before using this method. See `analogsea::key_create` method.")
+    }
 
     createArgs <- list(...)
     createArgs$tags <- c(createArgs$tags, "plumber")
