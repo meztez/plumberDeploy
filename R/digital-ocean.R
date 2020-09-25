@@ -290,9 +290,12 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #'   but before `run()`ing the plumber service. This is an opportunity to e.g.
 #'   add new filters. If you need to specify multiple commands, they should be
 #'   semi-colon-delimited.
+#' @param ... additional arguments to pass to [analogsea::droplet_ssh()] or
+#'   [analogsea::droplet_upload()], such as `keyfile`.
+#'   Cannot contain `remote`, `local` as named arguments.
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
-                          docs=FALSE, preflight){
+                          docs=FALSE, preflight, ...){
   # Trim off any leading slashes
   path <- sub("^/+", "", path)
   # Trim off any trailing slashes if any exist.
@@ -312,11 +315,11 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
   dirName <- basename(localPath)
-  analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp))
-  analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp)
+  analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp), ...)
+  analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp, ...)
   analogsea::droplet_ssh(droplet,
                          paste("mv", paste0(remoteTmp, "/", dirName, "/"),
-                               paste0("/var/plumber/", path)))
+                               paste0("/var/plumber/", path)), ...)
 
   ### SYSTEMD ###
   serviceName <- paste0("plumber-", path)
@@ -347,18 +350,20 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 
   remotePath <- file.path("/etc/systemd/system", paste0(serviceName, ".service"))
 
-  analogsea::droplet_upload(droplet, servicefile, remotePath)
-  analogsea::droplet_ssh(droplet, "systemctl daemon-reload")
+  analogsea::droplet_upload(droplet, servicefile, remotePath, ...)
+  analogsea::droplet_ssh(droplet, "systemctl daemon-reload", ...)
 
   # TODO: add this as a catch()
   file.remove(servicefile)
 
   # TODO: differentiate between new service (start) and existing service (restart)
-  analogsea::droplet_ssh(droplet, paste0("systemctl start ", serviceName, " && sleep 1"))
+  analogsea::droplet_ssh(droplet,
+                         paste0("systemctl start ", serviceName, " && sleep 1"),
+                         ...)
   #TODO: can systemctl listen for the port to come online so we don't have to guess at a sleep value?
-  analogsea::droplet_ssh(droplet, paste0("systemctl restart ", serviceName, " && sleep 1"))
-  analogsea::droplet_ssh(droplet, paste0("systemctl enable ", serviceName))
-  analogsea::droplet_ssh(droplet, paste0("systemctl status ", serviceName))
+  analogsea::droplet_ssh(droplet, paste0("systemctl restart ", serviceName, " && sleep 1"), ...)
+  analogsea::droplet_ssh(droplet, paste0("systemctl enable ", serviceName), ...)
+  analogsea::droplet_ssh(droplet, paste0("systemctl status ", serviceName), ...)
 
   ### NGINX ###
   # Prepare the nginx conf file
@@ -371,7 +376,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 
   remotePath <- file.path("/etc/nginx/sites-available/plumber-apis", paste0(path, ".conf"))
 
-  analogsea::droplet_upload(droplet, conffile, remotePath)
+  analogsea::droplet_upload(droplet, conffile, remotePath, ...)
 
   # TODO: add this as a catch()
   file.remove(conffile)
@@ -380,7 +385,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
     do_forward(droplet, path)
   }
 
-  analogsea::droplet_ssh(droplet, "systemctl reload nginx")
+  analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
 }
 
 #' Forward Root Requests to an API
