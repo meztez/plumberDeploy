@@ -201,7 +201,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
     # from the droplet to get a real-time response.
     metadata <- droplet_capture(droplet, "curl http://169.254.169.254/metadata/v1.json")
 
-    parsed <- parse_json(metadata, simplifyVector = TRUE)
+    parsed <- jsonlite::parse_json(metadata, simplifyVector = TRUE)
     floating <- unlist(lapply(parsed$floating_ip, function(ipv){ ipv$ip_address }))
     ephemeral <- unlist(parsed$interfaces$public)["ipv4.ip_address"]
 
