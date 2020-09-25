@@ -7,6 +7,7 @@
 #' Create (if required), install the necessary prerequisites, and
 #' deploy a sample plumber application on a DigitalOcean virtual machine.
 #' You may sign up for a Digital Ocean account [here](https://m.do.co/c/add0b50f54c4).
+#' You should configure an account ssh key with [analogsea::key_create()] prior to using this method.
 #' This command is idempotent, so feel free to run it on a single server multiple times.
 #' @param droplet The DigitalOcean droplet that you want to provision
 #' (see [analogsea::droplet()]). If empty, a new DigitalOcean server will be created.
@@ -33,9 +34,15 @@
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 
   if (missing(droplet)){
+
     # No droplet provided; create a new server
     message("THIS ACTION COSTS YOU MONEY!")
     message("Provisioning a new server for which you will get a bill from DigitalOcean.")
+
+    # Check if DO has ssh keys configured
+    if (!length(analogsea::keys())) {
+      stop("Please add an ssh key to your Digital Ocean account before using this method. See `analogsea::key_create` method.")
+    }
 
     createArgs <- list(...)
     createArgs$tags <- c(createArgs$tags, "plumber")
@@ -65,26 +72,23 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   install_firewall(droplet)
 
   if (example){
-    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package="plumber"), port=8000, forward=TRUE)
+    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package = "plumber"), port=8000, forward=TRUE)
   }
 
   invisible(droplet)
 }
 
 install_plumber <- function(droplet, unstable){
-  # Satisfy sodium's requirements
-  analogsea::debian_apt_get_install(droplet, "libsodium-dev")
+
+  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev")
 
   if (unstable){
-    analogsea::debian_apt_get_install(droplet, "libcurl4-openssl-dev")
-    analogsea::debian_apt_get_install(droplet, "libgit2-dev")
-    analogsea::debian_apt_get_install(droplet, "libssl-dev")
-    analogsea::debian_apt_get_install(droplet, "libsodium-dev")
-    analogsea::install_r_package(droplet, "remotes", repo="https://cran.rstudio.com")
+    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
     analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"")
   } else {
-    analogsea::install_r_package(droplet, "plumber")
+    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
   }
+
 }
 
 #' Captures the output from running some command via SSH
@@ -136,22 +140,10 @@ install_nginx <- function(droplet){
 }
 
 install_new_r <- function(droplet){
-  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 51716619E084DAB9")
-  analogsea::droplet_ssh(droplet, paste0(
-    "echo 'deb https://cran.rstudio.com/bin/linux/ubuntu ",
-    "focal-cran40/' >> /etc/apt/sources.list.d/cran.list")
-  )
-  # TODO: use the analogsea version once https://github.com/sckott/analogsea/issues/139 is resolved
-  #analogsea::debian_apt_get_update(droplet)
-  analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
-  analogsea::droplet_ssh(
-    droplet,
-    paste0('sudo DEBIAN_FRONTEND=noninteractive ',
-           'apt-get -y -o Dpkg::Options::="',
-           '--force-confdef" -o Dpkg::Options::="',
-           '--force-confold" upgrade')
-  )
-
+  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"))
+  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9")
+  analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'")
+  analogsea::debian_apt_get_update(droplet)
   analogsea::debian_install_r(droplet)
 }
 
