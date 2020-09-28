@@ -2,3 +2,10 @@
 
 language: R
 cache: packages
+
+addons:
+  apt:
+    packages:
+    - libcurl4-openssl-dev
+    - libxml2-dev
+    - libssh-dev
