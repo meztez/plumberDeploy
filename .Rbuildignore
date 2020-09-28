@@ -1,4 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^\.travis\.yml$
+^appveyor\.yml$
 ^\.httr-oauth$
+^README\.Rmd$
+^.github$
+^\.github$

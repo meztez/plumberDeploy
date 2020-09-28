@@ -11,7 +11,8 @@ do_deploy_api(
   port,
   forward = FALSE,
   docs = FALSE,
-  preflight
+  preflight,
+  ...
 )
 }
 \arguments{
@@ -41,6 +42,10 @@ deployed API. By default, the interface is disabled.}
 but before \code{run()}ing the plumber service. This is an opportunity to e.g.
 add new filters. If you need to specify multiple commands, they should be
 semi-colon-delimited.}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}} or
+\code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}, such as \code{keyfile}.
+Cannot contain \code{remote}, \code{local} as named arguments.}
 }
 \description{
 Deploys an API from your local machine to make it available on the remote
