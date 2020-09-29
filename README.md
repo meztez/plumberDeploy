@@ -1,8 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-plumberDeploy
-=============
+# plumberDeploy
 
 <!-- badges: start -->
 
@@ -16,6 +15,31 @@ status](https://github.com/muschellij2/plumberDeploy/workflows/R-CMD-check/badge
 status](https://github.com/meztez/plumberDeploy/workflows/R-CMD-check/badge.svg)](https://github.com/meztez/plumberDeploy/actions)
 <!-- badges: end -->
 
-Please configure an ssh key for your Digital Ocean account before using
-these methods. Use `analogsea::key_create` method or see
-<a href="https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/" class="uri">https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/</a>.
+First create a Digital Ocean account. Validate using
+`analogsea::account()`.
+
+Then configure an ssh key for your Digital Ocean account before using
+methods included in this package. Use `analogsea::key_create` method or
+see
+<https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/>.
+
+## Deploy an api to a new droplet
+
+`.api/plumber.R`
+
+``` r
+#* @get /
+function() {
+  Sys.Date()
+}
+```
+
+Then run this code
+
+``` r
+id <- plumberDeploy::do_provision(example = FALSE)
+# About 10 minutes
+plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
+```
+
+Navigate to: `[[IPADDRESS]]/date/__docs__/`
