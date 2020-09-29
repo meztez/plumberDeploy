@@ -331,6 +331,20 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
       "using old syntax for documentation (swagger instead of docs)",
       "- getting passed through to droplet, failing..."))
   }
+  plumber_path = paste0("/var/plumber/", path)
+
+  # removing the path in case it already exists (may want to error here)
+  # analogsea::droplet_ssh(droplet, paste0("rm -rf ", plumber_path), ...)
+
+  cmd = paste0("if [ -f ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
+  check_path = analogsea::droplet_ssh(droplet, cmd, ...)
+  check_path = as.logical(check_path)
+  if (check_path) {
+    stop(paste0(plumber_path, " already exists, either rename ",
+                "or run do_remove_api"))
+  }
+
+
   analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp), ...)
   analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp, ...)
   analogsea::droplet_ssh(droplet,
