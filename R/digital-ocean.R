@@ -31,6 +31,14 @@
 #'  - A 4GB swap file is created to ensure that machines with little RAM (the default) are
 #'    able to get through the necessary R package compilations.
 #' @export
+#' @examples \dontrun{
+#' droplet = do_provision()
+#' analogsea::droplets()
+#' analogsea::install_r_package(droplet, c("readr", "remotes"))
+#' do_deploy_api(droplet, "hello",
+#' system.file("plumber", "10-welcome", package = "plumber"),
+#' port=8000, forward=TRUE)
+#' }
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 
   if (missing(droplet)){
@@ -296,6 +304,8 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
                           docs=FALSE, preflight, ...){
+
+
   # Trim off any leading slashes
   path <- sub("^/+", "", path)
   # Trim off any trailing slashes if any exist.
@@ -315,6 +325,12 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
   dirName <- basename(localPath)
+  L = list(...)
+  if ("swagger" %in% names(L)) {
+    stop(paste0(
+      "using old syntax for documentation (swagger instead of docs)",
+      "- getting passed through to droplet, failing..."))
+  }
   analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp), ...)
   analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp, ...)
   analogsea::droplet_ssh(droplet,
