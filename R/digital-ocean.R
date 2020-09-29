@@ -304,6 +304,9 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
                           docs=FALSE, preflight, ...){
+  lifecycle::deprecate_stop("0.1.3",
+                            "do_deploy_api(swagger = )",
+                            "do_deploy_api(docs = )")
 
 
   # Trim off any leading slashes
@@ -325,12 +328,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
   dirName <- basename(localPath)
-  L = list(...)
-  if ("swagger" %in% names(L)) {
-    stop(paste0(
-      "using old syntax for documentation (swagger instead of docs)",
-      "- getting passed through to droplet, failing..."))
-  }
+
   plumber_path = paste0("/var/plumber/", path)
 
   # removing the path in case it already exists (may want to error here)

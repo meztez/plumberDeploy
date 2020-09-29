@@ -19,7 +19,8 @@ RoxygenNote: 7.1.1
 Imports:
     analogsea (>= 0.7.0),
     ssh,
-    jsonlite
+    jsonlite,
+    lifecycle
 BugReports: https://github.com/meztez/plumberDeploy/issues
 URL: https://github.com/meztez/plumberDeploy
 SystemRequirements: libssh >= 0.6.0 (the original, not libssh2)
