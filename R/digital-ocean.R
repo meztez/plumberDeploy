@@ -41,7 +41,7 @@
 #' }
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 
-  if (missing(droplet)){
+  if (missing(droplet) || is.null(droplet)){
 
     # No droplet provided; create a new server
     message("THIS ACTION COSTS YOU MONEY!")
