@@ -304,9 +304,12 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
                           docs=FALSE, preflight, ...){
-  lifecycle::deprecate_stop("0.1.3",
-                            "do_deploy_api(swagger = )",
-                            "do_deploy_api(docs = )")
+  args = list(...)
+  if ("swagger" %in% names(args)) {
+    lifecycle::deprecate_stop("0.1.3",
+                              "do_deploy_api(swagger = )",
+                              "do_deploy_api(docs = )")
+  }
 
 
   # Trim off any leading slashes
