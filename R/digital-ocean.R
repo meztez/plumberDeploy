@@ -341,7 +341,8 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   check_path =
     capture.output({
       analogsea::droplet_ssh(droplet, cmd, ...)
-    })
+    }, type = "output")
+  check_path = check_path[ check_path %in% c("TRUE", "FALSE")]
   check_path = as.logical(check_path)
   if (check_path) {
     stop(paste0(plumber_path, " already exists, either rename ",
