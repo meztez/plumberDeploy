@@ -20,7 +20,8 @@ Imports:
     analogsea (>= 0.7.0),
     ssh,
     jsonlite,
-    lifecycle
+    lifecycle,
+    utils
 BugReports: https://github.com/meztez/plumberDeploy/issues
 URL: https://github.com/meztez/plumberDeploy
 SystemRequirements: libssh >= 0.6.0 (the original, not libssh2)

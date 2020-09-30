@@ -301,9 +301,11 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
 #' @param ... additional arguments to pass to [analogsea::droplet_ssh()] or
 #'   [analogsea::droplet_upload()], such as `keyfile`.
 #'   Cannot contain `remote`, `local` as named arguments.
+#' @param overwrite if an application is already running for this `path` name,
+#'   and `overwrite = TRUE`, then `do_remove_api` will be run.
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
-                          docs=FALSE, preflight, ...){
+                          docs=FALSE, preflight, overwrite = FALSE, ...){
   args = list(...)
   if ("swagger" %in% names(args)) {
     lifecycle::deprecate_stop("0.1.3",
@@ -336,17 +338,26 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 
   # removing the path in case it already exists (may want to error here)
   # analogsea::droplet_ssh(droplet, paste0("rm -rf ", plumber_path), ...)
+  if (overwrite) {
+    output = try({
+      do_remove_api(droplet, path = path, delete = TRUE, ...)
+    }, silent = TRUE)
+    if (inherits(output, "try-error")) {
+      msg = paste0("Tried to remove ", path, " application had issues")
+      warning(msg)
+    }
+  }
 
   cmd = paste0("if [ -f ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
   check_path =
-    capture.output({
+    utils::capture.output({
       analogsea::droplet_ssh(droplet, cmd, ...)
     }, type = "output")
   check_path = check_path[ check_path %in% c("TRUE", "FALSE")]
   check_path = as.logical(check_path)
   if (check_path) {
-    stop(paste0(plumber_path, " already exists, either rename ",
-                "or run do_remove_api"))
+      stop(paste0(plumber_path, " already exists, either rename ",
+                  "or run do_remove_api"))
   }
 
 
@@ -463,8 +474,11 @@ do_forward <- function(droplet, path){
 #' @param path The path/name of the plumber service
 #' @param delete If `TRUE`, will also delete the associated directory
 #'   (`/var/plumber/whatever`) from the server.
+#' @param ... additional arguments to pass to [analogsea::droplet_ssh()] or
+#'   [analogsea::droplet_upload()], such as `keyfile`.
+#'   Cannot contain `remote`, `local` as named arguments.
 #' @export
-do_remove_api <- function(droplet, path, delete=FALSE){
+do_remove_api <- function(droplet, path, delete=FALSE, ...){
   # Trim off any leading slashes
   path <- sub("^/+", "", path)
   # Trim off any trailing slashes if any exist.
@@ -481,18 +495,27 @@ do_remove_api <- function(droplet, path, delete=FALSE){
   if (nchar(path)==0){
     stop("Path cannot be empty.")
   }
-
+  try_ssh = function(...) {
+    try(analogsea::droplet_ssh(...), silent = TRUE)
+  }
   serviceName <- paste0("plumber-", path)
-  analogsea::droplet_ssh(droplet, paste0("systemctl stop ", serviceName))
-  analogsea::droplet_ssh(droplet, paste0("systemctl disable ", serviceName))
-  analogsea::droplet_ssh(droplet, paste0("rm /etc/systemd/system/", serviceName, ".service"))
-  analogsea::droplet_ssh(droplet, paste0("rm /etc/nginx/sites-available/plumber-apis/", path, ".conf"))
+  message("stopping service: ", serviceName)
+  try_ssh(droplet, paste0("systemctl stop ", serviceName), ...)
+  message("disabling service: ", serviceName)
+  try_ssh(droplet, paste0("systemctl disable ", serviceName), ...)
+  message("removing service: ", serviceName)
+  try_ssh(droplet, paste0("rm /etc/systemd/system/", serviceName, ".service"), ...)
+  message("removing config: ", serviceName)
+  try_ssh(droplet, paste0("rm /etc/nginx/sites-available/plumber-apis/", path, ".conf"), ...)
 
-  analogsea::droplet_ssh(droplet, "systemctl reload nginx")
+  message("reloading nginx: ", serviceName)
+  try_ssh(droplet, "systemctl reload nginx", ...)
 
   if(delete){
-    analogsea::droplet_ssh(droplet, paste0("rm -rf /var/plumber/", path))
+    message("reloading plumber folder: ", serviceName)
+    try_ssh(droplet, paste0("rm -rf /var/plumber/", path), ...)
   }
+  return(droplet)
 }
 
 #' Remove the forwarding rule
