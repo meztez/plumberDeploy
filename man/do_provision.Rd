@@ -43,3 +43,13 @@ allows incoming traffic on port 22 (SSH) and port 80 (HTTP).
 able to get through the necessary R package compilations.
 }
 }
+\examples{
+\dontrun{
+droplet = do_provision()
+analogsea::droplets()
+analogsea::install_r_package(droplet, c("readr", "remotes"))
+do_deploy_api(droplet, "hello",
+system.file("plumber", "10-welcome", package = "plumber"),
+port=8000, forward=TRUE)
+}
+}

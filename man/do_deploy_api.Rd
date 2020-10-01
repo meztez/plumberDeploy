@@ -12,6 +12,7 @@ do_deploy_api(
   forward = FALSE,
   docs = FALSE,
   preflight,
+  overwrite = FALSE,
   ...
 )
 }
@@ -42,6 +43,9 @@ deployed API. By default, the interface is disabled.}
 but before \code{run()}ing the plumber service. This is an opportunity to e.g.
 add new filters. If you need to specify multiple commands, they should be
 semi-colon-delimited.}
+
+\item{overwrite}{if an application is already running for this \code{path} name,
+and \code{overwrite = TRUE}, then \code{do_remove_api} will be run.}
 
 \item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}} or
 \code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}, such as \code{keyfile}.

@@ -1,3 +1,8 @@
+# plumberDeploy 0.1.4
+
+* Removed `swagger` as an argument for deployment.
+* Added checks to see if the application was already present.
+
 # plumberDeploy 0.1.3
 
 * Added a `NEWS.md` file to track changes to the package.

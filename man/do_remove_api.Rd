@@ -4,7 +4,7 @@
 \alias{do_remove_api}
 \title{Remove an API from the server}
 \usage{
-do_remove_api(droplet, path, delete = FALSE)
+do_remove_api(droplet, path, delete = FALSE, ...)
 }
 \arguments{
 \item{droplet}{The droplet on which to act. It's expected that this droplet
@@ -15,6 +15,10 @@ obtain a reference to a running droplet.}
 
 \item{delete}{If \code{TRUE}, will also delete the associated directory
 (\verb{/var/plumber/whatever}) from the server.}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}} or
+\code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}, such as \code{keyfile}.
+Cannot contain \code{remote}, \code{local} as named arguments.}
 }
 \description{
 Removes all services and routing rules associated with a particular service.
