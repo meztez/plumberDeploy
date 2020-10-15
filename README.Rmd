@@ -27,6 +27,8 @@ First create a Digital Ocean account. Validate using `analogsea::account()`.
 Then configure an ssh key for your Digital Ocean account before using methods included in this package.
 Use `analogsea::key_create` method or see https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/.
 
+Your ssh key needs to be available on your local machine too. You can check this with `ssh::ssh_key_info()`. Validate that one of the public keys can be found in `lapply(analogsea::keys(), '[[', "public_key")`.
+
 ## Deploy an api to a new droplet
 
 `.api/plumber.R`
