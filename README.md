@@ -1,7 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# plumberDeploy
+plumberDeploy
+=============
 
 <!-- badges: start -->
 
@@ -21,25 +22,26 @@ First create a Digital Ocean account. Validate using
 Then configure an ssh key for your Digital Ocean account before using
 methods included in this package. Use `analogsea::key_create` method or
 see
-<https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/>.
+<a href="https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/" class="uri">https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/to-account/</a>.
 
-## Deploy an api to a new droplet
+Your ssh key needs to be available on your local machine too. You can
+check this with `ssh::ssh_key_info()`. Validate that one of the public
+keys can be found in `lapply(analogsea::keys(), '[[', "public_key")`.
+
+Deploy an api to a new droplet
+------------------------------
 
 `.api/plumber.R`
 
-``` r
-#* @get /
-function() {
-  Sys.Date()
-}
-```
+    #* @get /
+    function() {
+      Sys.Date()
+    }
 
 Then run this code
 
-``` r
-id <- plumberDeploy::do_provision(example = FALSE)
-# About 10 minutes
-plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
-```
+    id <- plumberDeploy::do_provision(example = FALSE)
+    # About 10 minutes
+    plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
 
 Navigate to: `[[IPADDRESS]]/date/__docs__/`
