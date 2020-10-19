@@ -9,7 +9,8 @@ do_configure_https(
   domain,
   email,
   termsOfService = FALSE,
-  force = FALSE
+  force = FALSE,
+  ...
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ Must be set to true to obtain a certificate through letsencrypt.}
 \item{force}{If \code{FALSE}, will abort if it believes that the given domain name
 is not yet pointing at the appropriate IP address for this droplet. If
 \code{TRUE}, will ignore this check and attempt to proceed regardless.}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}}}
 }
 \description{
 Adds TLS/SSL (HTTPS) to a droplet created using \code{\link[=do_provision]{do_provision()}}.

@@ -11,7 +11,7 @@ Authors@R: c(
 Depends:
     R (>= 3.0.0)
 Description: Gives the ability to automatically deploy a plumber API
-    from R functions on DigitalOcean and other cloud-based servers.
+    from R functions on 'DigitalOcean' and other cloud-based servers.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

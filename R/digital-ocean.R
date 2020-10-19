@@ -6,7 +6,8 @@
 #'
 #' Create (if required), install the necessary prerequisites, and
 #' deploy a sample plumber application on a DigitalOcean virtual machine.
-#' You may sign up for a Digital Ocean account [here](https://m.do.co/c/add0b50f54c4).
+#' You may sign up for a Digital Ocean account
+#' [here](https://www.digitalocean.com/?refcode=add0b50f54c4&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste).
 #' You should configure an account ssh key with [analogsea::key_create()] prior to using this method.
 #' This command is idempotent, so feel free to run it on a single server multiple times.
 #' @param droplet The DigitalOcean droplet that you want to provision
@@ -101,7 +102,7 @@ install_plumber <- function(droplet, unstable){
 
 #' Captures the output from running some command via SSH
 #' @noRd
-droplet_capture <- function(droplet, command){
+droplet_capture <- function(droplet, command, ...){
   tf <- tempdir()
   randName <- paste(sample(c(letters, LETTERS), size=10, replace=TRUE), collapse="")
   tff <- file.path(tf, randName)
@@ -110,9 +111,9 @@ droplet_capture <- function(droplet, command){
       file.remove(tff)
     }
   })
-  analogsea::droplet_ssh(droplet, paste0(command, " > /tmp/", randName))
-  analogsea::droplet_download(droplet, paste0("/tmp/", randName), tf)
-  analogsea::droplet_ssh(droplet, paste0("rm /tmp/", randName))
+  analogsea::droplet_ssh(droplet, paste0(command, " > /tmp/", randName), ...)
+  analogsea::droplet_download(droplet, paste0("/tmp/", randName), tf, ...)
+  analogsea::droplet_ssh(droplet, paste0("rm /tmp/", randName), ...)
   lin <- readLines(tff)
   lin
 }
@@ -188,8 +189,11 @@ install_new_r <- function(droplet){
 #' @param force If `FALSE`, will abort if it believes that the given domain name
 #'   is not yet pointing at the appropriate IP address for this droplet. If
 #'   `TRUE`, will ignore this check and attempt to proceed regardless.
+#' @param ... additional arguments to pass to [analogsea::droplet_ssh()]
 #' @export
-do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, force=FALSE){
+do_configure_https <- function(droplet, domain, email,
+                               termsOfService=FALSE, force=FALSE,
+                               ...){
 
   # This could be done locally, but I don't have a good way of testing cross-platform currently.
   # I can't figure out how to capture the output of the system() call inside
@@ -197,7 +201,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
   if (!force){
     nslookup <- tempfile()
 
-    nsout <- droplet_capture(droplet, paste0("nslookup ", domain))
+    nsout <- droplet_capture(droplet, paste0("nslookup ", domain), ...)
 
     ips <- nsout[grepl("^Address: ", nsout)]
     ip <- gsub("^Address: (.*)$", "\\1", ips)
@@ -207,7 +211,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
     # passed in, then we might not have that information available anyways.
     # It turns out that we can use the 'Droplet Metadata' system to query for this info
     # from the droplet to get a real-time response.
-    metadata <- droplet_capture(droplet, "curl http://169.254.169.254/metadata/v1.json")
+    metadata <- droplet_capture(droplet, "curl http://169.254.169.254/metadata/v1.json", ...)
 
     parsed <- jsonlite::parse_json(metadata, simplifyVector = TRUE)
     floating <- unlist(lapply(parsed$floating_ip, function(ipv){ ipv$ip_address }))
@@ -252,7 +256,7 @@ do_configure_https <- function(droplet, domain, email, termsOfService=FALSE, for
   conffile <- tempfile()
   writeLines(conf, conffile)
 
-  analogsea::droplet_ssh(droplet, "add-apt-repository ppa:certbot/certbot")
+  analogsea::droplet_ssh(droplet, "add-apt-repository ppa:certbot/certbot", ...)
   analogsea::debian_apt_get_update(droplet)
   analogsea::debian_apt_get_install(droplet, "certbot")
   analogsea::droplet_ssh(droplet, "ufw allow https")

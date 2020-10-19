@@ -21,7 +21,8 @@ to the server on port 8000.}
 \description{
 Create (if required), install the necessary prerequisites, and
 deploy a sample plumber application on a DigitalOcean virtual machine.
-You may sign up for a Digital Ocean account \href{https://m.do.co/c/add0b50f54c4}{here}.
+You may sign up for a Digital Ocean account
+\href{https://www.digitalocean.com/?refcode=add0b50f54c4&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste}{here}.
 You should configure an account ssh key with \code{\link[analogsea:key-crud]{analogsea::key_create()}} prior to using this method.
 This command is idempotent, so feel free to run it on a single server multiple times.
 }
