@@ -37,6 +37,13 @@ And the development version from [GitHub](https://github.com/) with:
 Setup
 -----
 
+If you’re just getting started with hosting cloud servers, the
+[DigitalOcean](https://www.digitalocean.com) integration included in
+`plumberDeploy` will be the best way to get started. You’ll be able to
+get a server hosting your custom API in just two R commands. Full
+documentation is available at
+<a href="https://www.rplumber.io/articles/hosting.html#digitalocean-1" class="uri">https://www.rplumber.io/articles/hosting.html#digitalocean-1</a>.
+
 1.  [Create a DigitalOcean
     account](https://www.digitalocean.com/?refcode=add0b50f54c4&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste)
 2.  Install `plumberDeploy`. Validate your account with
@@ -61,7 +68,7 @@ once you have `analogsea` connected to your DigitalOcean account, you’re
 now able to spin up new Plumber servers in DigitalOcean hosting your
 APIs with just a couple of R commands. You can even write [scripts that
 provision an entire Plumber
-server](https://github.com/rstudio/plumber/blob/d9f4acc163168ae179c55e781cfa43f03551f825/inst/hosted-new.R)
+server](https://github.com/meztez/plumberDeploy/blob/master/inst/hosted-new.R)
 with multiple APIs associated.
 
 Deploy an api to a new droplet
@@ -81,13 +88,3 @@ Then run this code
     plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
 
 Navigate to: `[[IPADDRESS]]/date/__docs__/`
-
-Hosting
-=======
-
-If you’re just getting started with hosting cloud servers, the
-[DigitalOcean](https://www.digitalocean.com) integration included in
-`plumberDeploy` will be the best way to get started. You’ll be able to
-get a server hosting your custom API in just two R commands. Full
-documentation is available at
-<a href="https://www.rplumber.io/articles/hosting.html#digitalocean-1" class="uri">https://www.rplumber.io/articles/hosting.html#digitalocean-1</a>.
