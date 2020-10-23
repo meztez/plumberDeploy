@@ -87,15 +87,15 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   invisible(droplet)
 }
 
-install_plumber <- function(droplet, unstable){
+install_plumber <- function(droplet, unstable, ...){
 
-  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev")
+  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
 
   if (unstable){
-    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
-    analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"")
+    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", ...)
+    analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"", ...)
   } else {
-    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest")
+    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", ...)
   }
 
 }
@@ -118,8 +118,8 @@ droplet_capture <- function(droplet, command, ...){
   lin
 }
 
-install_api <- function(droplet){
-  analogsea::droplet_ssh(droplet, "mkdir -p /var/plumber")
+install_api <- function(droplet, ...){
+  analogsea::droplet_ssh(droplet, "mkdir -p /var/plumber", ...)
   example_plumber_file <- system.file("plumber", "10-welcome", "plumber.R", package="plumber")
   if (nchar(example_plumber_file) < 1) {
     stop("Could not find example 10-welcome plumber file", call. = FALSE)
@@ -128,32 +128,32 @@ install_api <- function(droplet){
     droplet,
     local = example_plumber_file,
     remote = "/var/plumber/",
-    verbose = TRUE)
+    ...)
 }
 
-install_firewall <- function(droplet){
-  analogsea::droplet_ssh(droplet, "ufw allow http")
-  analogsea::droplet_ssh(droplet, "ufw allow ssh")
-  analogsea::droplet_ssh(droplet, "ufw -f enable")
+install_firewall <- function(droplet, ...){
+  analogsea::droplet_ssh(droplet, "ufw allow http", ...)
+  analogsea::droplet_ssh(droplet, "ufw allow ssh", ...)
+  analogsea::droplet_ssh(droplet, "ufw -f enable", ...)
 }
 
-install_nginx <- function(droplet){
-  analogsea::debian_apt_get_install(droplet, "nginx")
-  analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default") # Disable the default site
-  analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot")
-  analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/")
+install_nginx <- function(droplet, ...){
+  analogsea::debian_apt_get_install(droplet, "nginx", ...)
+  analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default", ...) # Disable the default site
+  analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot", ...)
+  analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/", ...)
   analogsea::droplet_upload(droplet, local=system.file("server", "nginx.conf", package="plumberDeploy"),
-                            remote="/etc/nginx/sites-available/plumber")
-  analogsea::droplet_ssh(droplet, "ln -sf /etc/nginx/sites-available/plumber /etc/nginx/sites-enabled/")
-  analogsea::droplet_ssh(droplet, "systemctl reload nginx")
+                            remote="/etc/nginx/sites-available/plumber", ...)
+  analogsea::droplet_ssh(droplet, "ln -sf /etc/nginx/sites-available/plumber /etc/nginx/sites-enabled/", ...)
+  analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
 }
 
-install_new_r <- function(droplet){
-  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"))
-  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9")
-  analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'")
-  analogsea::debian_apt_get_update(droplet)
-  analogsea::debian_install_r(droplet)
+install_new_r <- function(droplet, ...){
+  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"), ...)
+  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9", ...)
+  analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'", ...)
+  analogsea::debian_apt_get_update(droplet, ...)
+  analogsea::debian_install_r(droplet, ...)
 }
 
 #' Add HTTPS to a plumber Droplet
@@ -257,9 +257,9 @@ do_configure_https <- function(droplet, domain, email,
   writeLines(conf, conffile)
 
   analogsea::droplet_ssh(droplet, "add-apt-repository ppa:certbot/certbot", ...)
-  analogsea::debian_apt_get_update(droplet)
-  analogsea::debian_apt_get_install(droplet, "certbot")
-  analogsea::droplet_ssh(droplet, "ufw allow https")
+  analogsea::debian_apt_get_update(droplet, ...)
+  analogsea::debian_apt_get_install(droplet, "certbot", ...)
+  analogsea::droplet_ssh(droplet, "ufw allow https", ...)
   analogsea::droplet_ssh(
     droplet,
     sprintf(
@@ -267,10 +267,10 @@ do_configure_https <- function(droplet, domain, email,
              "/var/certbot/ -n -d %s --email %s ",
              "--agree-tos --renew-hook ",
              "'/bin/systemctl reload nginx'"),
-      domain, email)
+      domain, email), ...
   )
-  analogsea::droplet_upload(droplet, conffile, "/etc/nginx/sites-available/plumber")
-  analogsea::droplet_ssh(droplet, "systemctl reload nginx")
+  analogsea::droplet_upload(droplet, conffile, "/etc/nginx/sites-available/plumber", ...)
+  analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
 
   # TODO: add this as a catch()
   file.remove(conffile)
@@ -443,8 +443,9 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 #' @param droplet The droplet on which to act. It's expected that this droplet
 #'   was provisioned using [do_provision()].
 #' @param path The path to which root requests should be forwarded
+#' @param ... additional arguments to pass to [analogsea::droplet_upload()]
 #' @export
-do_forward <- function(droplet, path){
+do_forward <- function(droplet, path, ...){
   # Trim off any leading slashes
   path <- sub("^/+", "", path)
   # Trim off any trailing slashes if any exist.
@@ -460,7 +461,7 @@ do_forward <- function(droplet, path){
   forwardfile <- tempfile()
   writeLines(forward, forwardfile)
 
-  analogsea::droplet_upload(droplet, forwardfile, "/etc/nginx/sites-available/plumber-apis/_forward.conf")
+  analogsea::droplet_upload(droplet, forwardfile, "/etc/nginx/sites-available/plumber-apis/_forward.conf", ...)
 
   # TODO: add this as a catch()
   file.remove(forwardfile)
@@ -528,10 +529,11 @@ do_remove_api <- function(droplet, path, delete=FALSE, ...){
 #' no longer forward requests for `/` to an application.
 #' @param droplet The droplet on which to act. It's expected that this droplet
 #'   was provisioned using [do_provision()]. See [analogsea::droplet()] to obtain a reference to a running droplet.
+#' @param ... additional arguments to pass to [analogsea::droplet_ssh()]
 #' @export
-do_remove_forward <- function(droplet){
-  analogsea::droplet_ssh(droplet, "rm /etc/nginx/sites-available/plumber-apis/_forward.conf")
-  analogsea::droplet_ssh(droplet, "systemctl reload nginx")
+do_remove_forward <- function(droplet, ...){
+  analogsea::droplet_ssh(droplet, "rm /etc/nginx/sites-available/plumber-apis/_forward.conf", ...)
+  analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
 }
 
 # nocov end
