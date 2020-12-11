@@ -1,8 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-plumberDeploy
-=============
+# plumberDeploy
 
 <!-- badges: start -->
 
@@ -21,28 +20,30 @@ functions from `plumber`. The `plumberDeploy` package gives the ability
 to automatically deploy a plumber API from R functions on ‘DigitalOcean’
 and other cloud-based servers.
 
-Installation
-------------
+## Installation
 
 You can install the released version of `plumberDeploy` from
 [CRAN](https://CRAN.R-project.org) with (coming soon!):
 
-    install.packages("plumberDeploy")
+``` r
+install.packages("plumberDeploy")
+```
 
 And the development version from [GitHub](https://github.com/) with:
 
-    # install.packages("remotes")
-    remotes::install_github("meztez/plumberDeploy")
+``` r
+# install.packages("remotes")
+remotes::install_github("meztez/plumberDeploy")
+```
 
-Setup
------
+## Setup
 
 If you’re just getting started with hosting cloud servers, the
 [DigitalOcean](https://www.digitalocean.com) integration included in
 `plumberDeploy` will be the best way to get started. You’ll be able to
 get a server hosting your custom API in just two R commands. Full
 documentation is available at
-<a href="https://www.rplumber.io/articles/hosting.html#digitalocean-1" class="uri">https://www.rplumber.io/articles/hosting.html#digitalocean-1</a>.
+<https://www.rplumber.io/articles/hosting.html#digitalocean-1>.
 
 1.  [Create a DigitalOcean
     account](https://www.digitalocean.com/?refcode=add0b50f54c4&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste)
@@ -71,20 +72,27 @@ provision an entire Plumber
 server](https://github.com/meztez/plumberDeploy/blob/master/inst/hosted-new.R)
 with multiple APIs associated.
 
-Deploy an api to a new droplet
-------------------------------
+Your ssh key needs to be available on your local machine too. You can
+check this with `ssh::ssh_key_info()`. Validate that one of the public
+keys can be found in `lapply(analogsea::keys(), '[[', "public_key")`.
+
+## Deploy an api to a new droplet
 
 `.api/plumber.R`
 
-    #* @get /
-    function() {
-      Sys.Date()
-    }
+``` r
+#* @get /
+function() {
+  Sys.Date()
+}
+```
 
 Then run this code
 
-    id <- plumberDeploy::do_provision(example = FALSE)
-    # About 10 minutes
-    plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
+``` r
+id <- plumberDeploy::do_provision(example = FALSE)
+# About 10 minutes
+plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
+```
 
 Navigate to: `[[IPADDRESS]]/date/__docs__/`

@@ -60,8 +60,12 @@ https://www.rplumber.io/articles/hosting.html#digitalocean-1.
 1. (Optional) Setup a domain name for your Plumber server so you can use www.myplumberserver.com instead of the server's IP address.
 1. (Optional) Configure SSL
 
+
 Getting everything connected the first time can be a bit of work, but once you have `analogsea` connected to your DigitalOcean account, you're now able to spin up new Plumber servers in DigitalOcean hosting your APIs with just a couple of R commands. You can even write [scripts that provision an entire Plumber server](https://github.com/meztez/plumberDeploy/blob/master/inst/hosted-new.R) with multiple APIs associated.
 
+Your ssh key needs to be available on your local machine too. You can
+check this with `ssh::ssh_key_info()`. Validate that one of the public
+keys can be found in `lapply(analogsea::keys(), '[[', "public_key")`.
 
 ## Deploy an api to a new droplet
 
