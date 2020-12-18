@@ -322,6 +322,9 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   if (grepl("/", path)){
     stop("Can't deploy to nested paths. '", path, "' should not have a / in it.")
   }
+  if (grepl(" ", path)){
+    stop("Can't deploy to paths with whitespace. '", path, "' should not have a whitespace in it.")
+  }
 
   # TODO: check local path for plumber.R file.
   apiPath <- file.path(localPath, "plumber.R")
@@ -333,6 +336,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
   dirName <- gsub("^\\.?$", "*", basename(localPath))
+  dirName <- gsub(" ", "\\\\ ", dirName)
 
   plumber_path = paste0("/var/plumber/", path)
 
@@ -348,7 +352,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
     }
   }
 
-  cmd = paste0("if [ -f ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
+  cmd = paste0("if [ -d ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
   check_path =
     utils::capture.output({
       analogsea::droplet_ssh(droplet, cmd, ...)
@@ -356,8 +360,8 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   check_path = check_path[ check_path %in% c("TRUE", "FALSE")]
   check_path = as.logical(check_path)
   if (check_path) {
-      stop(paste0(plumber_path, " already exists, either rename ",
-                  "or run do_remove_api"))
+      stop(paste0(plumber_path, " already exists, either rename, ",
+                  "rerun with `overwrite=TRUE`"))
   }
 
 

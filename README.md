@@ -47,3 +47,16 @@ plumberDeploy::do_deploy_api(id, "date", "./api/", 8000, docs = TRUE)
 ```
 
 Navigate to: `[[IPADDRESS]]/date/__docs__/`
+
+Others command you might need
+
+``` r
+# Install dependencies packages to your droplet
+analogsea::install_r_package(droplet, c("readr", "remotes"))
+# Install system dependencies to your droplet
+analogsea::debian_apt_get_install(droplet, "libssl-dev","libsodium-dev", "libcurl4-openssl-dev")
+```
+
+Otherwise read the doc on function, ask questions in the [RStudio
+community](https://community.rstudio.com/) or report issues to our
+github issue tracker.
