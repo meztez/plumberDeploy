@@ -1,3 +1,7 @@
+# Development version
+
+Fix `do_deploy_api` using localPath `./`
+
 # plumberDeploy 0.1.4
 
 * Removed `swagger` as an argument for deployment.

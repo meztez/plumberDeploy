@@ -332,7 +332,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   ### UPLOAD the API ###
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
-  dirName <- basename(localPath)
+  dirName <- gsub("^\\.?$", "*", basename(localPath))
 
   plumber_path = paste0("/var/plumber/", path)
 
@@ -364,7 +364,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp), ...)
   analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp, ...)
   analogsea::droplet_ssh(droplet,
-                         paste("mv", paste0(remoteTmp, "/", dirName, "/"),
+                         paste("mv", paste(remoteTmp, dirName, sep = "/"),
                                paste0("/var/plumber/", path)), ...)
 
   ### SYSTEMD ###
