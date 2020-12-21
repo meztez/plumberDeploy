@@ -388,12 +388,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
   service <- gsub("\\$PREFLIGHT\\$", preflight, service)
 
-  if (missing(docs)){
-    docs <- "FALSE"
-  } else {
-    docs <- "TRUE"
-  }
-  service <- gsub("\\$DOCS\\$", docs, service)
+  service <- gsub("\\$DOCS\\$", as.character(docs), service)
 
   servicefile <- tempfile()
   writeLines(service, servicefile)
@@ -436,6 +431,14 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
 
   analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
+
+  public_ip <- analogsea:::droplet_ip_safe(droplet)
+  if (isTRUE(docs)) {
+    message("Navigate to ", public_ip, "/", path, "/__docs__/ to access api documentation.")
+  } else {
+    message("Api root url is ", public_ip, "/", path,". Any endpoints from api will be served relative to this root.")
+  }
+
 }
 
 #' Forward Root Requests to an API

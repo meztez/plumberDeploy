@@ -1,6 +1,7 @@
 # Development version
 
-Fix `do_deploy_api` using localPath `./`
+Fix `do_deploy_api` using localPath `./`.
+Print api url to console after successful `do_deploy_api`.
 
 # plumberDeploy 0.1.4
 
