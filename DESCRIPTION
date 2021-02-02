@@ -1,7 +1,7 @@
 Package: plumberDeploy
 Type: Package
 Title: Plumber Deployment
-Version: 0.1.3.9000
+Version: 0.1.3.9003
 Roxygen: list(markdown = TRUE)
 Authors@R: c(
   person("Bruno", "Tremblay", role = c("aut", "cre"), email = "cran@neoxone.com"),
