@@ -326,6 +326,9 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   if (grepl("/", path)){
     stop("Can't deploy to nested paths. '", path, "' should not have a / in it.")
   }
+  if (grepl(" ", path)){
+    stop("Can't deploy to paths with whitespace. '", path, "' should not have a whitespace in it.")
+  }
 
   # TODO: check local path for plumber.R file.
   apiPath <- file.path(localPath, "plumber.R")
@@ -336,7 +339,8 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   ### UPLOAD the API ###
   remoteTmp <- paste0("/tmp/",
                       paste0(sample(LETTERS, 10, replace=TRUE), collapse=""))
-  dirName <- basename(localPath)
+  dirName <- gsub("^\\.?$", "*", basename(localPath))
+  dirName <- gsub(" ", "\\\\ ", dirName)
 
   plumber_path = paste0("/var/plumber/", path)
 
@@ -352,7 +356,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
     }
   }
 
-  cmd = paste0("if [ -f ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
+  cmd = paste0("if [ -d ", plumber_path, " ]; then echo 'TRUE'; else echo 'FALSE'; fi")
   check_path =
     utils::capture.output({
       analogsea::droplet_ssh(droplet, cmd, ...)
@@ -360,15 +364,15 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   check_path = check_path[ check_path %in% c("TRUE", "FALSE")]
   check_path = as.logical(check_path)
   if (check_path) {
-      stop(paste0(plumber_path, " already exists, either rename ",
-                  "or run do_remove_api"))
+      stop(paste0(plumber_path, " already exists, either rename, ",
+                  "rerun with `overwrite=TRUE`"))
   }
 
 
   analogsea::droplet_ssh(droplet, paste0("mkdir -p ", remoteTmp), ...)
   analogsea::droplet_upload(droplet, local=localPath, remote=remoteTmp, ...)
   analogsea::droplet_ssh(droplet,
-                         paste("mv", paste0(remoteTmp, "/", dirName, "/"),
+                         paste("mv", paste(remoteTmp, dirName, sep = "/"),
                                paste0("/var/plumber/", path)), ...)
 
   ### SYSTEMD ###
@@ -388,12 +392,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
   service <- gsub("\\$PREFLIGHT\\$", preflight, service)
 
-  if (missing(docs)){
-    docs <- "FALSE"
-  } else {
-    docs <- "TRUE"
-  }
-  service <- gsub("\\$DOCS\\$", docs, service)
+  service <- gsub("\\$DOCS\\$", as.character(docs), service)
 
   servicefile <- tempfile()
   writeLines(service, servicefile)
@@ -436,6 +435,14 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
 
   analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
+
+  public_ip <- analogsea:::droplet_ip_safe(droplet)
+  if (isTRUE(docs)) {
+    message("Navigate to ", public_ip, "/", path, "/__docs__/ to access api documentation.")
+  } else {
+    message("Api root url is ", public_ip, "/", path,". Any endpoints from api will be served relative to this root.")
+  }
+
 }
 
 #' Forward Root Requests to an API
