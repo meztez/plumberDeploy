@@ -436,7 +436,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 
   analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
 
-  public_ip <- analogsea:::droplet_ip_safe(droplet)
+  public_ip <- droplet_ip_safe(droplet)
   if (isTRUE(docs)) {
     message("Navigate to ", public_ip, "/", path, "/__docs__/ to access api documentation.")
   } else {
@@ -444,6 +444,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   }
 
 }
+
 
 #' Forward Root Requests to an API
 #'
