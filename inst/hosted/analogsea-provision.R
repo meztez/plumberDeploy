@@ -28,7 +28,7 @@ install_docker <- function(droplet){
 install_new_r <- function(droplet){
   droplet %>%
     droplet_ssh(c("echo 'deb https://cran.rstudio.com/bin/linux/ubuntu focal-cran40/' >> /etc/apt/sources.list",
-                  "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9")) %>%
+                  "sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E298A3A825C0D65DFD57CBB651716619E084DAB9'")) %>%
     debian_apt_get_update() %>%
     debian_install_r()
 }
