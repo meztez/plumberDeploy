@@ -170,7 +170,7 @@ install_new_r <- function(droplet){
 #'
 #' In order to get a TLS/SSL certificate, you need to point a domain name to the
 #' IP address associated with your droplet. If you don't already have a domain
-#' name, you can register one [here](http://tres.tl/domain). Point a (sub)domain
+#' name, you can register one [here](https://www.name.com/). Point a (sub)domain
 #' to the IP address associated with your plumber droplet before calling this
 #' function. These changes may take a few minutes or hours to propagate around
 #' the Internet, but once complete you can then execute this function with the
