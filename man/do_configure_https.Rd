@@ -9,7 +9,8 @@ do_configure_https(
   domain,
   email,
   termsOfService = FALSE,
-  force = FALSE
+  force = FALSE,
+  ...
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ Must be set to true to obtain a certificate through letsencrypt.}
 \item{force}{If \code{FALSE}, will abort if it believes that the given domain name
 is not yet pointing at the appropriate IP address for this droplet. If
 \code{TRUE}, will ignore this check and attempt to proceed regardless.}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}}}
 }
 \description{
 Adds TLS/SSL (HTTPS) to a droplet created using \code{\link[=do_provision]{do_provision()}}.
@@ -37,7 +40,7 @@ Adds TLS/SSL (HTTPS) to a droplet created using \code{\link[=do_provision]{do_pr
 \details{
 In order to get a TLS/SSL certificate, you need to point a domain name to the
 IP address associated with your droplet. If you don't already have a domain
-name, you can register one \href{http://tres.tl/domain}{here}. Point a (sub)domain
+name, you can register one \href{https://www.name.com/}{here}. Point a (sub)domain
 to the IP address associated with your plumber droplet before calling this
 function. These changes may take a few minutes or hours to propagate around
 the Internet, but once complete you can then execute this function with the

@@ -4,13 +4,15 @@
 \alias{do_forward}
 \title{Forward Root Requests to an API}
 \usage{
-do_forward(droplet, path)
+do_forward(droplet, path, ...)
 }
 \arguments{
 \item{droplet}{The droplet on which to act. It's expected that this droplet
 was provisioned using \code{\link[=do_provision]{do_provision()}}.}
 
 \item{path}{The path to which root requests should be forwarded}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}}
 }
 \description{
 Forward Root Requests to an API

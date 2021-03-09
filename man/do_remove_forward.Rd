@@ -4,11 +4,13 @@
 \alias{do_remove_forward}
 \title{Remove the forwarding rule}
 \usage{
-do_remove_forward(droplet)
+do_remove_forward(droplet, ...)
 }
 \arguments{
 \item{droplet}{The droplet on which to act. It's expected that this droplet
 was provisioned using \code{\link[=do_provision]{do_provision()}}. See \code{\link[analogsea:droplet]{analogsea::droplet()}} to obtain a reference to a running droplet.}
+
+\item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}}}
 }
 \description{
 Removes the forwarding rule from the root path on the server. The server will

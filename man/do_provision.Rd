@@ -2,9 +2,12 @@
 % Please edit documentation in R/digital-ocean.R
 \name{do_provision}
 \alias{do_provision}
+\alias{do_install_plumber}
 \title{Provision a DigitalOcean plumber server}
 \usage{
 do_provision(droplet, unstable = FALSE, example = TRUE, ...)
+
+do_install_plumber(droplet, unstable, ...)
 }
 \arguments{
 \item{droplet}{The DigitalOcean droplet that you want to provision
@@ -21,7 +24,8 @@ to the server on port 8000.}
 \description{
 Create (if required), install the necessary prerequisites, and
 deploy a sample plumber application on a DigitalOcean virtual machine.
-You may sign up for a Digital Ocean account \href{https://m.do.co/c/add0b50f54c4}{here}.
+You may sign up for a Digital Ocean account
+\href{https://www.digitalocean.com/?refcode=add0b50f54c4&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=CopyPaste}{here}.
 You should configure an account ssh key with \code{\link[analogsea:key-crud]{analogsea::key_create()}} prior to using this method.
 This command is idempotent, so feel free to run it on a single server multiple times.
 }
@@ -45,11 +49,18 @@ able to get through the necessary R package compilations.
 }
 \examples{
 \dontrun{
-droplet = do_provision()
-analogsea::droplets()
-analogsea::install_r_package(droplet, c("readr", "remotes"))
-do_deploy_api(droplet, "hello",
-system.file("plumber", "10-welcome", package = "plumber"),
-port=8000, forward=TRUE)
+  auth = try(analogsea:::do_oauth())
+  if (!inherits(auth, "try-error") &&
+      inherits(auth, "request")) {
+    analogsea::droplets()
+    droplet = do_provision(region = "sfo3", example = FALSE)
+    analogsea::droplets()
+    analogsea::install_r_package(droplet, c("readr", "remotes"))
+    do_deploy_api(droplet, "hello",
+                  system.file("plumber", "10-welcome", package = "plumber"),
+                  port=8000, forward=TRUE)
+    browseURL(paste0(plumberDeploy:::droplet_ip(droplet), "/hello"))
+    analogsea::droplet_delete(droplet)
+  }
 }
 }
