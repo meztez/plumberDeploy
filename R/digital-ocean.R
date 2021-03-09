@@ -36,12 +36,14 @@
 #'   auth = try(analogsea:::do_oauth())
 #'   if (!inherits(auth, "try-error") &&
 #'       inherits(auth, "request")) {
-#'     droplet = do_provision()
+#'     analogsea::droplets()
+#'     droplet = do_provision(region = "sfo3", example = FALSE)
 #'     analogsea::droplets()
 #'     analogsea::install_r_package(droplet, c("readr", "remotes"))
 #'     do_deploy_api(droplet, "hello",
 #'                   system.file("plumber", "10-welcome", package = "plumber"),
 #'                   port=8000, forward=TRUE)
+#'     browseURL(paste0(plumberDeploy:::droplet_ip(droplet), "/hello"))
 #'     analogsea::droplet_delete(droplet)
 #'   }
 #' }
@@ -79,17 +81,24 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   if (lines != "1"){
     analogsea::debian_add_swap(droplet)
   }
-  install_new_r(droplet)
-  install_plumber(droplet, unstable)
-  install_api(droplet)
-  install_nginx(droplet)
-  install_firewall(droplet)
+
+  do_install_plumber(droplet, unstable)
 
   if (example){
     do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package = "plumber"), port=8000, forward=TRUE)
   }
 
   invisible(droplet)
+}
+
+#' @export
+#' @rdname do_provision
+do_install_plumber = function(droplet, unstable, ...) {
+  install_new_r(droplet, ...)
+  install_plumber(droplet, unstable, ...)
+  install_api(droplet, ...)
+  install_nginx(droplet, ...)
+  install_firewall(droplet, ...)
 }
 
 install_plumber <- function(droplet, unstable, ...){

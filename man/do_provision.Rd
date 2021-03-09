@@ -2,9 +2,12 @@
 % Please edit documentation in R/digital-ocean.R
 \name{do_provision}
 \alias{do_provision}
+\alias{do_install_plumber}
 \title{Provision a DigitalOcean plumber server}
 \usage{
 do_provision(droplet, unstable = FALSE, example = TRUE, ...)
+
+do_install_plumber(droplet, unstable, ...)
 }
 \arguments{
 \item{droplet}{The DigitalOcean droplet that you want to provision
@@ -49,12 +52,14 @@ able to get through the necessary R package compilations.
   auth = try(analogsea:::do_oauth())
   if (!inherits(auth, "try-error") &&
       inherits(auth, "request")) {
-    droplet = do_provision()
+    analogsea::droplets()
+    droplet = do_provision(region = "sfo3", example = FALSE)
     analogsea::droplets()
     analogsea::install_r_package(droplet, c("readr", "remotes"))
     do_deploy_api(droplet, "hello",
                   system.file("plumber", "10-welcome", package = "plumber"),
                   port=8000, forward=TRUE)
+    browseURL(paste0(plumberDeploy:::droplet_ip(droplet), "/hello"))
     analogsea::droplet_delete(droplet)
   }
 }

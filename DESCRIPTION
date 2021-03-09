@@ -17,7 +17,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports:
-    analogsea (>= 0.7.0),
+    analogsea (>= 0.9.4),
     ssh,
     jsonlite,
     lifecycle,
