@@ -33,12 +33,17 @@
 #'    able to get through the necessary R package compilations.
 #' @export
 #' @examples \dontrun{
-#' droplet = do_provision()
-#' analogsea::droplets()
-#' analogsea::install_r_package(droplet, c("readr", "remotes"))
-#' do_deploy_api(droplet, "hello",
-#' system.file("plumber", "10-welcome", package = "plumber"),
-#' port=8000, forward=TRUE)
+#'   auth = try(analogsea:::do_oauth())
+#'   if (!inherits(auth, "try-error") &&
+#'       inherits(auth, "request")) {
+#'     droplet = do_provision()
+#'     analogsea::droplets()
+#'     analogsea::install_r_package(droplet, c("readr", "remotes"))
+#'     do_deploy_api(droplet, "hello",
+#'                   system.file("plumber", "10-welcome", package = "plumber"),
+#'                   port=8000, forward=TRUE)
+#'     analogsea::droplet_delete(droplet)
+#'   }
 #' }
 do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 
@@ -149,9 +154,13 @@ install_nginx <- function(droplet, ...){
 }
 
 install_new_r <- function(droplet, ...){
-  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"), ...)
+  analogsea::droplet_ssh(droplet, "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment", ...)
+  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"),
+                                    ...)
   analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9", ...)
   analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'", ...)
+  analogsea::droplet_upload(droplet, local=system.file("server", "apt.conf.d", package="plumberDeploy"),
+                            remote = "/etc/apt", ...)
   analogsea::debian_apt_get_update(droplet, ...)
   analogsea::debian_install_r(droplet, ...)
 }
@@ -162,7 +171,7 @@ install_new_r <- function(droplet, ...){
 #'
 #' In order to get a TLS/SSL certificate, you need to point a domain name to the
 #' IP address associated with your droplet. If you don't already have a domain
-#' name, you can register one [here](http://tres.tl/domain). Point a (sub)domain
+#' name, you can register one [here](https://www.name.com/). Point a (sub)domain
 #' to the IP address associated with your plumber droplet before calling this
 #' function. These changes may take a few minutes or hours to propagate around
 #' the Internet, but once complete you can then execute this function with the

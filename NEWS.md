@@ -1,7 +1,8 @@
 # Development version
 
-Fix `do_deploy_api` using localPath `./`.
-Print api url to console after successful `do_deploy_api`.
+* Fix `do_deploy_api` using localPath `./`.
+* Print api url to console after successful `do_deploy_api`.
+* Set Dpkg::Options to `--force-confnew` to avoid prompt during apt-get update.
 
 # plumberDeploy 0.1.4
 
