@@ -3,6 +3,7 @@
 
 # plumberDeploy 0.2.0
 
+* Submitted to CRAN.
 * Added `do_install_plumber` function.
 * Fix `do_deploy_api` using localPath `./`.
 * Print api url to console after successful `do_deploy_api`.

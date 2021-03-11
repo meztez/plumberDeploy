@@ -31,6 +31,9 @@
 #'    allows incoming traffic on port 22 (SSH) and port 80 (HTTP).
 #'  - A 4GB swap file is created to ensure that machines with little RAM (the default) are
 #'    able to get through the necessary R package compilations.
+#' @note Please see \url{https://github.com/sckott/analogsea/issues/205} in case
+#' of an error by default `do_provision` and an error of
+#' `"Error: Size is not available in this region."`.
 #' @export
 #' @examples \dontrun{
 #'   auth = try(analogsea:::do_oauth())
