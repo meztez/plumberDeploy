@@ -20,6 +20,9 @@ obtain a reference to a running droplet.}
 \code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}, such as \code{keyfile}.
 Cannot contain \code{remote}, \code{local} as named arguments.}
 }
+\value{
+The DigitalOcean droplet, but called for side effects
+}
 \description{
 Removes all services and routing rules associated with a particular service.
 Optionally purges the associated API directory from disk.

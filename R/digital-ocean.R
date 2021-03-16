@@ -17,6 +17,7 @@
 #' @param example If `TRUE`, will deploy an example API named `hello`
 #' to the server on port 8000.
 #' @param ... Arguments passed into the [analogsea::droplet_create()] function.
+#'
 #' @details Provisions a Ubuntu 20.04-x64 droplet with the following customizations:
 #'  - A recent version of R installed
 #'  - plumber installed globally in the system library
@@ -34,9 +35,10 @@
 #' @note Please see \url{https://github.com/sckott/analogsea/issues/205} in case
 #' of an error by default `do_provision` and an error of
 #' `"Error: Size is not available in this region."`.
+#' @return The DigitalOcean droplet
 #' @export
 #' @examples \dontrun{
-#'   auth = try(analogsea:::do_oauth())
+#'   auth = try(analogsea::do_oauth())
 #'   if (!inherits(auth, "try-error") &&
 #'       inherits(auth, "request")) {
 #'     analogsea::droplets()
@@ -46,7 +48,9 @@
 #'     do_deploy_api(droplet, "hello",
 #'                   system.file("plumber", "10-welcome", package = "plumber"),
 #'                   port=8000, forward=TRUE)
-#'     browseURL(paste0(plumberDeploy:::droplet_ip(droplet), "/hello"))
+#'     if (interactive()) {
+#'       do_browse(droplet, "/hello")
+#'     }
 #'     analogsea::droplet_delete(droplet)
 #'   }
 #' }
@@ -211,6 +215,7 @@ install_new_r <- function(droplet, ...){
 #'   is not yet pointing at the appropriate IP address for this droplet. If
 #'   `TRUE`, will ignore this check and attempt to proceed regardless.
 #' @param ... additional arguments to pass to [analogsea::droplet_ssh()]
+#' @return The DigitalOcean droplet
 #' @export
 do_configure_https <- function(droplet, domain, email,
                                termsOfService=FALSE, force=FALSE,
@@ -328,6 +333,7 @@ do_configure_https <- function(droplet, domain, email,
 #'   Cannot contain `remote`, `local` as named arguments.
 #' @param overwrite if an application is already running for this `path` name,
 #'   and `overwrite = TRUE`, then `do_remove_api` will be run.
+#' @return The DigitalOcean droplet, but called for side effects
 #' @export
 do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
                           docs=FALSE, preflight, overwrite = FALSE, ...){
@@ -463,7 +469,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
   } else {
     message("Api root url is ", public_ip, "/", path,". Any endpoints from api will be served relative to this root.")
   }
-
+  invisible(droplet)
 }
 
 
@@ -473,6 +479,7 @@ do_deploy_api <- function(droplet, path, localPath, port, forward=FALSE,
 #'   was provisioned using [do_provision()].
 #' @param path The path to which root requests should be forwarded
 #' @param ... additional arguments to pass to [analogsea::droplet_upload()]
+#' @return The DigitalOcean droplet
 #' @export
 do_forward <- function(droplet, path, ...){
   # Trim off any leading slashes
@@ -511,6 +518,7 @@ do_forward <- function(droplet, path, ...){
 #' @param ... additional arguments to pass to [analogsea::droplet_ssh()] or
 #'   [analogsea::droplet_upload()], such as `keyfile`.
 #'   Cannot contain `remote`, `local` as named arguments.
+#' @return The DigitalOcean droplet, but called for side effects
 #' @export
 do_remove_api <- function(droplet, path, delete=FALSE, ...){
   # Trim off any leading slashes
@@ -549,7 +557,7 @@ do_remove_api <- function(droplet, path, delete=FALSE, ...){
     message("reloading plumber folder: ", serviceName)
     try_ssh(droplet, paste0("rm -rf /var/plumber/", path), ...)
   }
-  return(droplet)
+  return(invisible(droplet))
 }
 
 #' Remove the forwarding rule
@@ -559,10 +567,25 @@ do_remove_api <- function(droplet, path, delete=FALSE, ...){
 #' @param droplet The droplet on which to act. It's expected that this droplet
 #'   was provisioned using [do_provision()]. See [analogsea::droplet()] to obtain a reference to a running droplet.
 #' @param ... additional arguments to pass to [analogsea::droplet_ssh()]
+#' @return The DigitalOcean droplet, but called for side effects
 #' @export
 do_remove_forward <- function(droplet, ...){
   analogsea::droplet_ssh(droplet, "rm /etc/nginx/sites-available/plumber-apis/_forward.conf", ...)
   analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
+  invisible(droplet)
+}
+
+#' @rdname do_provision
+#' @export
+do_browse = function(droplet, path) {
+  ip = droplet_ip(droplet)
+  if (!grepl("^(/|:)", path)) {
+    path = paste0("/", path)
+  }
+  ip = paste0(ip, path)
+  utils::browseURL(ip)
+  return(invisible(ip))
 }
 
 # nocov end
+

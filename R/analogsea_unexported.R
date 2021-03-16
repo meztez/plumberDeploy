@@ -1,6 +1,6 @@
-droplet_ip = function (x)
+droplet_ip = function (droplet)
 {
-  v4 <- x$network$v4
+  v4 <- droplet$network$v4
   if (length(v4) == 0) {
     stop("No network interface registered for this droplet\n  Try refreshing like: droplet(d$id)",
          call. = FALSE)
@@ -15,9 +15,9 @@ droplet_ip = function (x)
   }
   ip
 }
-droplet_ip_safe = function (x)
+droplet_ip_safe = function (droplet)
 {
-  res <- tryCatch(droplet_ip(x), error = function(e) e)
+  res <- tryCatch(droplet_ip(droplet), error = function(e) e)
   if (inherits(res, "simpleError"))
     "droplet likely not up yet"
   else res

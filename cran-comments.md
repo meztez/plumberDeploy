@@ -8,3 +8,6 @@
 0 errors | 0 warnings | 1 note
 
 * This is a new release.
+
+---
+Fixes \value issues in Rd files, fixes ::: in examples, and fixes authors.

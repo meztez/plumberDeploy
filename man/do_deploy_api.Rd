@@ -51,6 +51,9 @@ and \code{overwrite = TRUE}, then \code{do_remove_api} will be run.}
 \code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}, such as \code{keyfile}.
 Cannot contain \code{remote}, \code{local} as named arguments.}
 }
+\value{
+The DigitalOcean droplet, but called for side effects
+}
 \description{
 Deploys an API from your local machine to make it available on the remote
 plumber server.

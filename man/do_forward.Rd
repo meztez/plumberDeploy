@@ -14,6 +14,9 @@ was provisioned using \code{\link[=do_provision]{do_provision()}}.}
 
 \item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_upload()}}}
 }
+\value{
+The DigitalOcean droplet
+}
 \description{
 Forward Root Requests to an API
 }
