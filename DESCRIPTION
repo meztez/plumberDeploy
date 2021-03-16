@@ -10,7 +10,7 @@ Authors@R:
              email = "muschellij2@gmail.com"),
       person(given = "Jeff",
              family = "Allen",
-             role = c("aut", "ccp"),
+             role = c("aut", "ccp", "cph"),
              email = "cran@trestletech.com"),
       person(given = "John",
              family = "Muschelli",
