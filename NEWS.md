@@ -2,7 +2,7 @@
 
 # plumberDeploy 0.2.1
 
-* Added `do_browse` for example to open IP address in browser.
+* Added `do_ip` for example to get IP address to browse.
 
 # plumberDeploy 0.2.0
 

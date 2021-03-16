@@ -3,18 +3,18 @@
 \name{do_provision}
 \alias{do_provision}
 \alias{do_install_plumber}
-\alias{do_browse}
+\alias{do_ip}
 \title{Provision a DigitalOcean plumber server}
 \usage{
 do_provision(droplet, unstable = FALSE, example = TRUE, ...)
 
 do_install_plumber(droplet, unstable, ...)
 
-do_browse(droplet, path)
+do_ip(droplet, path)
 }
 \arguments{
 \item{droplet}{The DigitalOcean droplet that you want to provision
-(see \code{\link[analogsea:droplet]{analogsea::droplet()}}). If empty, a new DigitalOcean server will be created.}
+(see \code{\link[analogsea:droplet]{analogsea::droplet()}}).}
 
 \item{unstable}{If \code{FALSE}, will install plumber from CRAN. If \code{TRUE}, will
 install the unstable version of plumber from GitHub.}
@@ -23,9 +23,14 @@ install the unstable version of plumber from GitHub.}
 to the server on port 8000.}
 
 \item{...}{Arguments passed into the \code{\link[analogsea:droplet_create]{analogsea::droplet_create()}} function.}
+
+\item{path}{path to attach to the IP address before browsing.  Should likely
+start with a \code{/} or \code{:} (as in \verb{:8080}), otherwise \code{/} will be added.}
 }
 \value{
 The DigitalOcean droplet
+
+The URL to be browsed
 }
 \description{
 Create (if required), install the necessary prerequisites, and
@@ -71,7 +76,7 @@ of an error by default \code{do_provision} and an error of
                   system.file("plumber", "10-welcome", package = "plumber"),
                   port=8000, forward=TRUE)
     if (interactive()) {
-      do_browse(droplet, "/hello")
+        utils::browseURL(do_ip(droplet, "/hello"))
     }
     analogsea::droplet_delete(droplet)
   }

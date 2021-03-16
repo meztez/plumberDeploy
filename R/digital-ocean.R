@@ -49,7 +49,7 @@
 #'                   system.file("plumber", "10-welcome", package = "plumber"),
 #'                   port=8000, forward=TRUE)
 #'     if (interactive()) {
-#'       do_browse(droplet, "/hello")
+#'         utils::browseURL(do_ip(droplet, "/hello"))
 #'     }
 #'     analogsea::droplet_delete(droplet)
 #'   }
@@ -575,16 +575,23 @@ do_remove_forward <- function(droplet, ...){
   invisible(droplet)
 }
 
+#' Open a DigitalOcean Droplet IP address
+#'
+#' @param droplet The DigitalOcean droplet that you want to provision
+#' (see [analogsea::droplet()]).
+#' @param path path to attach to the IP address before browsing.  Should likely
+#' start with a `/` or `:` (as in `:8080`), otherwise `/` will be added.
+#'
 #' @rdname do_provision
 #' @export
-do_browse = function(droplet, path) {
+#' @return The URL to be browsed
+do_ip = function(droplet, path) {
   ip = droplet_ip(droplet)
   if (!grepl("^(/|:)", path)) {
     path = paste0("/", path)
   }
   ip = paste0(ip, path)
-  utils::browseURL(ip)
-  return(invisible(ip))
+  return(ip)
 }
 
 # nocov end
