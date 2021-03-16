@@ -4,7 +4,7 @@ Title: Plumber Deployment
 Version: 0.2.1
 Roxygen: list(markdown = TRUE)
 Authors@R: c(
-  person("Bruno", "Tremblay", role = c("cre", "aut"), email = "cran@neoxone.com"),
+  person("Bruno", "Tremblay", role = c("cre", "ctb"), email = "cran@neoxone.com"),
   person("Jeff", "Allen", role = c("aut", "ccp"), email = "cran@trestletech.com"),
   person("John", "Muschelli", role = "ctb", email = "muschellij2@gmail.com", comment = c(ORCID = "0000-0001-6469-1750")),
   person("Barret", "Schloerke", role = "ctb", email = "barret@rstudio.com"),
