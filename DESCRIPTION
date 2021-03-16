@@ -1,13 +1,22 @@
 Package: plumberDeploy
 Type: Package
 Title: Plumber Deployment
-Version: 0.2.0
+Version: 0.2.1
 Roxygen: list(markdown = TRUE)
-Authors@R: c(
-  person("Bruno", "Tremblay", role = c("aut", "cre"), email = "cran@neoxone.com"),
-  person("Jeff", "Allen", role = c("aut", "ccp"), email = "cran@trestletech.com"),
-  person("John", "Muschelli", email = "muschellij2@gmail.com",
-           role = c("aut"), comment = c(ORCID = "0000-0001-6469-1750")))
+Authors@R: 
+    c(person(given = "Bruno",
+             family = "Tremblay",
+             role = c("aut", "cre"),
+             email = "muschellij2@gmail.com"),
+      person(given = "Jeff",
+             family = "Allen",
+             role = c("aut", "ccp", "cph"),
+             email = "cran@trestletech.com"),
+      person(given = "John",
+             family = "Muschelli",
+             role = "aut",
+             email = "muschellij2@gmail.com",
+             comment = c(ORCID = "0000-0001-6469-1750")))
 Depends:
     R (>= 3.0.0)
 Description: Gives the ability to automatically deploy a plumber API
