@@ -1,5 +1,8 @@
 # Development Version
 
+# plumberDeploy 0.2.1
+
+* Added `do_browse` for example to open IP address in browser.
 
 # plumberDeploy 0.2.0
 

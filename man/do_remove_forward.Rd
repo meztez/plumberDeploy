@@ -12,6 +12,9 @@ was provisioned using \code{\link[=do_provision]{do_provision()}}. See \code{\li
 
 \item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}}}
 }
+\value{
+The DigitalOcean droplet, but called for side effects
+}
 \description{
 Removes the forwarding rule from the root path on the server. The server will
 no longer forward requests for \code{/} to an application.

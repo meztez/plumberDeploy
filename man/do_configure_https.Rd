@@ -34,6 +34,9 @@ is not yet pointing at the appropriate IP address for this droplet. If
 
 \item{...}{additional arguments to pass to \code{\link[analogsea:droplet_ssh]{analogsea::droplet_ssh()}}}
 }
+\value{
+The DigitalOcean droplet
+}
 \description{
 Adds TLS/SSL (HTTPS) to a droplet created using \code{\link[=do_provision]{do_provision()}}.
 }

@@ -3,11 +3,14 @@
 \name{do_provision}
 \alias{do_provision}
 \alias{do_install_plumber}
+\alias{do_browse}
 \title{Provision a DigitalOcean plumber server}
 \usage{
 do_provision(droplet, unstable = FALSE, example = TRUE, ...)
 
 do_install_plumber(droplet, unstable, ...)
+
+do_browse(droplet, path)
 }
 \arguments{
 \item{droplet}{The DigitalOcean droplet that you want to provision
@@ -20,6 +23,9 @@ install the unstable version of plumber from GitHub.}
 to the server on port 8000.}
 
 \item{...}{Arguments passed into the \code{\link[analogsea:droplet_create]{analogsea::droplet_create()}} function.}
+}
+\value{
+The DigitalOcean droplet
 }
 \description{
 Create (if required), install the necessary prerequisites, and
@@ -54,7 +60,7 @@ of an error by default \code{do_provision} and an error of
 }
 \examples{
 \dontrun{
-  auth = try(analogsea:::do_oauth())
+  auth = try(analogsea::do_oauth())
   if (!inherits(auth, "try-error") &&
       inherits(auth, "request")) {
     analogsea::droplets()
@@ -64,7 +70,9 @@ of an error by default \code{do_provision} and an error of
     do_deploy_api(droplet, "hello",
                   system.file("plumber", "10-welcome", package = "plumber"),
                   port=8000, forward=TRUE)
-    browseURL(paste0(plumberDeploy:::droplet_ip(droplet), "/hello"))
+    if (interactive()) {
+      do_browse(droplet, "/hello")
+    }
     analogsea::droplet_delete(droplet)
   }
 }
