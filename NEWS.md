@@ -1,5 +1,7 @@
 # Development Version
 
+* Change certbot install procedure, since PPA deprecated.
+
 # plumberDeploy 0.2.1
 
 * Added `do_ip` for example to get IP address to browse.

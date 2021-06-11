@@ -282,9 +282,10 @@ do_configure_https <- function(droplet, domain, email,
   conffile <- tempfile()
   writeLines(conf, conffile)
 
-  analogsea::droplet_ssh(droplet, "add-apt-repository ppa:certbot/certbot", ...)
-  analogsea::debian_apt_get_update(droplet, ...)
-  analogsea::debian_apt_get_install(droplet, "certbot", ...)
+  analogsea::droplet_ssh(droplet, "snap install core")
+  analogsea::droplet_ssh(droplet, "snap refresh core")
+  analogsea::droplet_ssh(droplet, "snap install --classic certbot")
+  analogsea::droplet_ssh(droplet, "ln -s /snap/bin/certbot /usr/bin/certbot")
   analogsea::droplet_ssh(droplet, "ufw allow https", ...)
   analogsea::droplet_ssh(
     droplet,
