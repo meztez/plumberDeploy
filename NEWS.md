@@ -1,6 +1,7 @@
 # Development Version
 
 * Change certbot install procedure, since PPA deprecated.
+* Add an apt update step before processing R install.
 
 # plumberDeploy 0.2.1
 

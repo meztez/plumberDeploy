@@ -171,6 +171,7 @@ install_nginx <- function(droplet, ...){
 
 install_new_r <- function(droplet, ...){
   analogsea::droplet_ssh(droplet, "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment", ...)
+  analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
   analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"),
                                     ...)
   analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9", ...)
