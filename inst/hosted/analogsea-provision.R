@@ -7,7 +7,7 @@ source("analog-keys.R")
 
 install <- function(droplet){
   droplet %>%
-    debian_add_swap() %>%
+    ubuntu_add_swap() %>%
     install_new_r() %>%
     install_docker() %>%
     prepare_plumber()
@@ -18,9 +18,9 @@ install_docker <- function(droplet){
     # Deprecated (Shutting down dockerproject.org APT and YUM repos 2020-03-31)
     droplet_ssh(c("sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D",
                   "echo 'deb https://apt.dockerproject.org/repo ubuntu-focal main' > /etc/apt/sources.list.d/docker.list")) %>%
-    debian_apt_get_update() %>%
+    ubuntu_apt_get_update() %>%
     droplet_ssh("sudo apt-get install linux-image-extra-$(uname -r)") %>%
-    debian_apt_get_install("docker-engine") %>%
+    ubuntu_apt_get_install("docker-engine") %>%
     droplet_ssh(c("curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose",
                   "chmod +x /usr/local/bin/docker-compose"))
 }
@@ -29,8 +29,8 @@ install_new_r <- function(droplet){
   droplet %>%
     droplet_ssh(c("echo 'deb https://cran.rstudio.com/bin/linux/ubuntu focal-cran40/' >> /etc/apt/sources.list",
                   "sudo apt-key adv --keyserver keys.gnupg.net --recv-key 'E298A3A825C0D65DFD57CBB651716619E084DAB9'")) %>%
-    debian_apt_get_update() %>%
-    debian_install_r()
+    ubuntu_apt_get_update() %>%
+    ubuntu_install_r()
 }
 
 prepare_plumber<- function(droplet){

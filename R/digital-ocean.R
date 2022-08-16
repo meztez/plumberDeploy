@@ -86,7 +86,7 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   # Provision
   lines <- droplet_capture(droplet, 'swapon | grep "/swapfile" | wc -l')
   if (lines != "1"){
-    analogsea::debian_add_swap(droplet)
+    analogsea::ubuntu_add_swap(droplet)
   }
 
   do_install_plumber(droplet, unstable)
@@ -110,7 +110,7 @@ do_install_plumber = function(droplet, unstable, ...) {
 
 install_plumber <- function(droplet, unstable, ...){
 
-  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
+  analogsea::ubuntu_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
 
   if (unstable){
     analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", ...)
@@ -159,7 +159,7 @@ install_firewall <- function(droplet, ...){
 }
 
 install_nginx <- function(droplet, ...){
-  analogsea::debian_apt_get_install(droplet, "nginx", ...)
+  analogsea::ubuntu_apt_get_install(droplet, "nginx", ...)
   analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default", ...) # Disable the default site
   analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot", ...)
   analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/", ...)
@@ -172,14 +172,14 @@ install_nginx <- function(droplet, ...){
 install_new_r <- function(droplet, ...){
   analogsea::droplet_ssh(droplet, "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment", ...)
   analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
-  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"),
+  analogsea::ubuntu_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"),
                                     ...)
   analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9", ...)
   analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'", ...)
   analogsea::droplet_upload(droplet, local=system.file("server", "apt.conf.d", package="plumberDeploy"),
                             remote = "/etc/apt", ...)
-  analogsea::debian_apt_get_update(droplet, ...)
-  analogsea::debian_install_r(droplet, ...)
+  analogsea::ubuntu_apt_get_update(droplet, ...)
+  analogsea::ubuntu_install_r(droplet, ...)
 }
 
 #' Add HTTPS to a plumber Droplet

@@ -93,7 +93,7 @@ Navigate to: `[[IPADDRESS]]/date/__docs__/`
 # Install package to your droplet
 analogsea::install_r_package(droplet, c("readr", "remotes"))
 # Install system dependencies to your droplet
-analogsea::debian_apt_get_install(droplet, "libssl-dev","libsodium-dev", "libcurl4-openssl-dev")
+analogsea::ubuntu_apt_get_install(droplet, "libssl-dev","libsodium-dev", "libcurl4-openssl-dev")
 ```
 
 R Packages installed on linux systems sometimes require system packages. Check console output carefully to see if a package was installed successfully.
