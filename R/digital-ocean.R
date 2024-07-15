@@ -62,19 +62,22 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
     message("THIS ACTION COSTS YOU MONEY!")
     message("Provisioning a new server for which you will get a bill from DigitalOcean.")
 
+    createArgs <- list(...)
+    createArgs$tags <- c(createArgs$tags, "plumber")
+    createArgs$image <- "ubuntu-24-04-x64"
+    keyfile <- createArgs$keyfile
+
+    # Check if local has ssh keys configured or keyfile provided
+    if (!length(ssh::ssh_key_info()) && is.null(keyfile)) {
+      stop("No local ssh key found with `ssh::ssh_key_info()` and `keyfile` argument not provided.")
+    }
+
     # Check if DO has ssh keys configured
     if (!length(analogsea::keys())) {
       stop("Please add an ssh key to your Digital Ocean account before using this method. See `analogsea::key_create` method.")
     }
 
-    createArgs <- list(...)
-    createArgs$tags <- c(createArgs$tags, "plumber")
-    createArgs$image <- "ubuntu-20-04-x64"
-
     droplet <- do.call(analogsea::droplet_create, createArgs)
-
-    # Wait for the droplet to come online
-    analogsea::droplet_wait(droplet)
 
     # I often still get a closed port after droplet_wait returns. Buffer for just a bit
     Sys.sleep(25)
@@ -84,15 +87,16 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
   }
 
   # Provision
-  lines <- droplet_capture(droplet, 'swapon | grep "/swapfile" | wc -l')
+  lines <- droplet_capture(droplet, 'swapon | grep "/swapfile" | wc -l', keyfile = keyfile)
   if (lines != "1"){
-    analogsea::debian_add_swap(droplet)
+    analogsea::ubuntu_add_swap(droplet)
+    Sys.sleep(5)
   }
 
   do_install_plumber(droplet, unstable)
 
   if (example){
-    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package = "plumber"), port=8000, forward=TRUE)
+    do_deploy_api(droplet, "hello", system.file("plumber", "10-welcome", package = "plumber"), port=8000, forward=TRUE, keyfile = keyfile)
   }
 
   invisible(droplet)
@@ -101,22 +105,35 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
 #' @export
 #' @rdname do_provision
 do_install_plumber = function(droplet, unstable, ...) {
-  install_new_r(droplet, ...)
+  analogsea::droplet_ssh(
+    droplet,
+    "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment",
+    "export R_VERSION=%s.%s" |> sprintf(R.version[["major"]], R.version[["minor"]]),
+    "curl -O https://cdn.rstudio.com/r/ubuntu-2404/pkgs/r-${R_VERSION}_1_amd64.deb",
+    "sudo apt-get update -y",
+    "sudo apt-get install -y ./r-${R_VERSION}_1_amd64.deb",
+    "sudo ln -s -f /opt/R/${R_VERSION}/bin/R /usr/local/bin/R",
+    "sudo ln -s -f /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript",
+    ...
+  )
+  Sys.sleep(3)
   install_plumber(droplet, unstable, ...)
   install_api(droplet, ...)
+  Sys.sleep(3)
   install_nginx(droplet, ...)
+  Sys.sleep(3)
   install_firewall(droplet, ...)
 }
 
 install_plumber <- function(droplet, unstable, ...){
 
-  analogsea::debian_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
+  analogsea::ubuntu_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
 
   if (unstable){
-    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", ...)
+    analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.posit.co/cran/__linux__/noble/latest", ...)
     analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"", ...)
   } else {
-    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", ...)
+    analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.posit.co/cran/__linux__/noble/latest", ...)
   }
 
 }
@@ -159,7 +176,7 @@ install_firewall <- function(droplet, ...){
 }
 
 install_nginx <- function(droplet, ...){
-  analogsea::debian_apt_get_install(droplet, "nginx", ...)
+  analogsea::ubuntu_apt_get_install(droplet, "nginx", ...)
   analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default", ...) # Disable the default site
   analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot", ...)
   analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/", ...)
@@ -167,19 +184,6 @@ install_nginx <- function(droplet, ...){
                             remote="/etc/nginx/sites-available/plumber", ...)
   analogsea::droplet_ssh(droplet, "ln -sf /etc/nginx/sites-available/plumber /etc/nginx/sites-enabled/", ...)
   analogsea::droplet_ssh(droplet, "systemctl reload nginx", ...)
-}
-
-install_new_r <- function(droplet, ...){
-  analogsea::droplet_ssh(droplet, "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment", ...)
-  analogsea::droplet_ssh(droplet, "sudo apt-get update -qq")
-  analogsea::debian_apt_get_install(droplet, c("dirmngr", "gnupg","apt-transport-https", "ca-certificates", "software-properties-common"),
-                                    ...)
-  analogsea::droplet_ssh(droplet, "apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9", ...)
-  analogsea::droplet_ssh(droplet, "add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'", ...)
-  analogsea::droplet_upload(droplet, local=system.file("server", "apt.conf.d", package="plumberDeploy"),
-                            remote = "/etc/apt", ...)
-  analogsea::debian_apt_get_update(droplet, ...)
-  analogsea::debian_install_r(droplet, ...)
 }
 
 #' Add HTTPS to a plumber Droplet

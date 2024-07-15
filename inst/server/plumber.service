@@ -2,7 +2,7 @@
 Description=Plumber API
 
 [Service]
-ExecStart=/usr/bin/Rscript -e "pr <- plumber::pr('/var/plumber$PATH$/plumber.R'); pr$setDocs($DOCS$); $PREFLIGHT$ pr$run(port=$PORT$)"
+ExecStart=Rscript -e "pr <- plumber::pr('/var/plumber$PATH$/plumber.R'); pr$setDocs($DOCS$); $PREFLIGHT$ pr$run(port=$PORT$)"
 Restart=on-abnormal
 WorkingDirectory=/var/plumber/$PATH$/
 

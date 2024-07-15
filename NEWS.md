@@ -2,6 +2,9 @@
 
 * Change certbot install procedure, since PPA deprecated.
 * Add an apt update step before processing R install.
+* Support `key_file` argument in `do_provision`.
+* Use Ubuntu 24.04 LTS image.
+* Change R install toolchain to use Posit R install instructions.
 
 # plumberDeploy 0.2.1
 
