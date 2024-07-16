@@ -1,7 +1,7 @@
 Package: plumberDeploy
 Type: Package
 Title: Plumber Deployment
-Version: 0.2.1.10000
+Version: 0.2.2
 Roxygen: list(markdown = TRUE)
 Authors@R: c(
   person("Bruno", "Tremblay", role = c("cre", "ctb"), email = "cran@neoxone.com"),
@@ -25,4 +25,3 @@ Imports:
     utils
 BugReports: https://github.com/meztez/plumberDeploy/issues
 URL: https://github.com/meztez/plumberDeploy
-SystemRequirements: libssh >= 0.6.0 (the original, not libssh2)

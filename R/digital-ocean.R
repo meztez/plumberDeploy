@@ -78,19 +78,16 @@ do_provision <- function(droplet, unstable=FALSE, example=TRUE, ...){
     }
 
     droplet <- do.call(analogsea::droplet_create, createArgs)
-
-    # I often still get a closed port after droplet_wait returns. Buffer for just a bit
-    Sys.sleep(25)
+    Sys.sleep(3)
 
     # Refresh the droplet; sometimes the original one doesn't yet have a network interface.
-    droplet <- analogsea::droplet(id=droplet$id)
+    droplet <- with_retries(analogsea::droplet(id=droplet$id))
   }
 
   # Provision
-  lines <- droplet_capture(droplet, 'swapon | grep "/swapfile" | wc -l', keyfile = keyfile)
+  lines <- with_retries(droplet_capture(droplet, 'swapon | grep "/swapfile" | wc -l', keyfile = keyfile))
   if (lines != "1"){
     analogsea::ubuntu_add_swap(droplet)
-    Sys.sleep(5)
   }
 
   do_install_plumber(droplet, unstable)
@@ -108,32 +105,41 @@ do_install_plumber = function(droplet, unstable, ...) {
   analogsea::droplet_ssh(
     droplet,
     "sudo echo 'DEBIAN_FRONTEND=noninteractive' >> /etc/environment",
-    "export R_VERSION=%s.%s" |> sprintf(R.version[["major"]], R.version[["minor"]]),
-    "curl -O https://cdn.rstudio.com/r/ubuntu-2404/pkgs/r-${R_VERSION}_1_amd64.deb",
-    "sudo apt-get update -y",
-    "sudo apt-get install -y ./r-${R_VERSION}_1_amd64.deb",
-    "sudo ln -s -f /opt/R/${R_VERSION}/bin/R /usr/local/bin/R",
-    "sudo ln -s -f /opt/R/${R_VERSION}/bin/Rscript /usr/local/bin/Rscript",
+    "curl -O https://cdn.rstudio.com/r/ubuntu-2404/pkgs/r-%s.%s_1_amd64.deb" |> sprintf(R.version[["major"]], R.version[["minor"]]),
     ...
   )
-  Sys.sleep(3)
+  with_retries(
+    analogsea::droplet_ssh(
+      droplet,
+      "sudo apt-get update -y",
+      "sudo apt-get install -y ./r-%s.%s_1_amd64.deb" |> sprintf(R.version[["major"]], R.version[["minor"]]),
+      ...
+    )
+  )
+  analogsea::droplet_ssh(
+    droplet,
+    "sudo ln -s -f /opt/R/%s.%s/bin/R /usr/local/bin/R" |> sprintf(R.version[["major"]], R.version[["minor"]]),
+    "sudo ln -s -f /opt/R/%s.%s/bin/Rscript /usr/local/bin/Rscript" |> sprintf(R.version[["major"]], R.version[["minor"]]),
+    ...
+  )
   install_plumber(droplet, unstable, ...)
   install_api(droplet, ...)
-  Sys.sleep(3)
   install_nginx(droplet, ...)
-  Sys.sleep(3)
   install_firewall(droplet, ...)
 }
 
 install_plumber <- function(droplet, unstable, ...){
 
-  analogsea::ubuntu_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
+  with_retries(
+    analogsea::ubuntu_apt_get_install(droplet, "libssl-dev", "make", "libsodium-dev", "libcurl4-openssl-dev", ...)
+  )
 
   if (unstable){
     analogsea::install_r_package(droplet, "remotes", repo = "https://packagemanager.posit.co/cran/__linux__/noble/latest", ...)
     analogsea::droplet_ssh(droplet, "Rscript -e \"remotes::install_github('rstudio/plumber')\"", ...)
   } else {
     analogsea::install_r_package(droplet, "plumber", repo = "https://packagemanager.posit.co/cran/__linux__/noble/latest", ...)
+
   }
 
 }
@@ -176,7 +182,7 @@ install_firewall <- function(droplet, ...){
 }
 
 install_nginx <- function(droplet, ...){
-  analogsea::ubuntu_apt_get_install(droplet, "nginx", ...)
+  with_retries(analogsea::ubuntu_apt_get_install(droplet, "nginx", ...))
   analogsea::droplet_ssh(droplet, "rm -f /etc/nginx/sites-enabled/default", ...) # Disable the default site
   analogsea::droplet_ssh(droplet, "mkdir -p /var/certbot", ...)
   analogsea::droplet_ssh(droplet, "mkdir -p /etc/nginx/sites-available/plumber-apis/", ...)
@@ -598,6 +604,28 @@ do_ip = function(droplet, path) {
   }
   ip = paste0(ip, path)
   return(ip)
+}
+
+with_retries <- with_retries <- function(expr, retries = 5L) {
+  attempt <- 1L
+  while (attempt <= retries) {
+    no_error <- TRUE
+    res <- tryCatch(
+      eval.parent(substitute(expr)),
+      error = function(e) {
+        message(sprintf("Error encountered : %s\n", e |> as.character()))
+        no_error <<- FALSE
+      }
+    )
+    if (no_error) break
+    message(paste("Retrying attemps", attempt, "in", 3^attempt, "seconds.\n"))
+    Sys.sleep(3^attempt)
+    attempt <- attempt + 1L
+    if (attempt > retries) {
+      stop("Expression could not be evaluated.")
+    }
+  }
+  return(res)
 }
 
 # nocov end
